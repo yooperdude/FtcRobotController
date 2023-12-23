@@ -1,5 +1,7 @@
 ## TeamCode Module
 
+Eskymos MoreBots - MoBots TeamCode area. See the Github wiki for a description of how to use the functions.
+
 Welcome!
 
 This module, TeamCode, is the place where you will write/paste the code for your team's
