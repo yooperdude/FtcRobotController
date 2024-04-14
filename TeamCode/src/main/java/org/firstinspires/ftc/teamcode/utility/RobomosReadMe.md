@@ -6,4 +6,4 @@ Folder Structure
 
 OpMode is where you will place OpModes that are to be picked and run.
 System is for systems and subsystems such as arms, motors, servos, etc.
-Utility is where setup info goes for things like constants.
+Utility is where setup info goes for things like constants. Change.
