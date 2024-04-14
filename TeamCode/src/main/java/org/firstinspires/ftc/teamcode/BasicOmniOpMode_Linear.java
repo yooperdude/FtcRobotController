@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.Servo;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -74,6 +75,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
 
+    private Servo servoTest = null;
+
     @Override
     public void runOpMode() {
 
@@ -83,6 +86,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+
+        servoTest = hardwareMap.get(Servo.class, "servoTest");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -133,6 +138,16 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 rightFrontPower /= max;
                 leftBackPower   /= max;
                 rightBackPower  /= max;
+            }
+            // If you press gamepad1 A then move to 0.5
+            if (gamepad1.a) {
+                servoTest.setPosition(0.5);
+                // If you press gamepad1 B then move to 0.0
+            } else if (gamepad1.b) {
+                servoTest.setPosition(0.0);
+                // If you press gamepad1 X then move to 1.0 (used to be 0.8)
+            } else if (gamepad1.x) {
+                servoTest.setPosition(1.0);
             }
 
             // This is test code:
