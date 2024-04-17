@@ -5,15 +5,22 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+
+
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-//TODO
-// Need to define multiple holding points. LOADING, LOADED, and UNLOADING for the ARMservo rotation
-// Need define gripper points such as OPEN and closed
+//TODO : Need to define multiple holding points. LOADING, LOADED, and UNLOADING for the ARMservo rotation
+// TODO : Need define gripper points such as OPEN and closed
+// TODO : Need to make a helper class for generic methods.
 
 
 @TeleOp(name="Basic: Omni Linear OpMode GMZERO", group="Linear OpMode")
@@ -34,8 +41,7 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
     private static final double GRIPPER_ROTATION_UP = 1.0;
     private static final double PLANE_LAUNCHER_CLOSED = 0.0;
     private static final double PLANE_LAUNCHER_OPEN = 1.0;
-
-    //Here we are defining the motors and servos that we will be using. The names must match the names in the configuration screen on the Driver Station.
+    //This area defines all of inputs and outputs.
     private DcMotor frontLeftMotor = null;
     private DcMotor backLeftMotor = null;
     private DcMotor frontRightMotor = null;
@@ -45,11 +51,22 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
     private Servo armServo1 = null;
     private Servo armServo2 = null;
     private Servo planeLauncher = null;
+    //This area defines a touch sensor called pixelSensor
+    private DigitalChannel pixelSensor;
+    //This area defines an analog input sensor called armSensor
+    private AnalogInput armSensor;
 
     private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void runOpMode() throws InterruptedException {
+
+        //Get the FTC Dashboard instance.
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        TelemetryPacket packet = new TelemetryPacket();
+
         //Declare our motors, make sure they match the configuration screen on the Driver Station
+        //Here we are defining the motors and servos that we will be using. The names must match the names in the configuration screen on the Driver Station.
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
@@ -66,6 +83,14 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
         //Need to reverse the right side motors. If the robot moves backwards when the left stick is pushed forward, reverse the frontRightMotor and backRightMotor
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        //Initialize the pixelSensor
+        pixelSensor = hardwareMap.get(DigitalChannel.class, "pixelSensor");
+        pixelSensor.setMode(DigitalChannel.Mode.INPUT);
+        //Initialize the armSensor
+        armSensor = hardwareMap.get(AnalogInput.class, "armSensor");
+        //Retrieve the armSensor value and scale it from 0 to 270 degrees
+        double armSensorValue = armSensor.getVoltage() * 270.0 / 3.3;
 
 
         //Retrieve the IMU from the hardware map.
@@ -91,6 +116,8 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
 
 
         while (opModeIsActive()) {
+            //Enable telemetry updates.
+            telemetry.update();
 
             String armStatus = "Up";
             String gripperStatus = "Closed";
@@ -110,6 +137,7 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
 
             //Calculate botheading from the IMU
             double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            telemetry.addData("Bot Heading", botHeading);
 
             //Rotate the movement direction counter to the bot's rotation
             double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
@@ -172,11 +200,21 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
             if (gamepad2.y && seconds > 180) {
                 planeLauncher.setPosition(PLANE_LAUNCHER_OPEN);
             }
+            //If the pixelSensor is touched then print "closed"
+            if (pixelSensor.getState() == false) {
+                telemetry.addData("DigitalTouchSensorExample", "Closed");
+            } else {
+                telemetry.addData("DigitalTouchSensorExample", "Open");
+            }
+
 
         }
-        //This class is used to move a servo
+
 
 
     }
+
 }
+
+
 
