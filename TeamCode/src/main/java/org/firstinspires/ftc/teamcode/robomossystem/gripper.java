@@ -14,7 +14,7 @@ public class gripper {
     private GripperState state;
 
     //Constructor
-    public Gripper() {
+    public gripper() {
         this.state = GripperState.OPEN;
     }
 
