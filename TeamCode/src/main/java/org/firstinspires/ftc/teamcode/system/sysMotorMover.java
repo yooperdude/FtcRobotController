@@ -4,6 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+/**
+ * This is a test class of a variety of functions, not to be used.
+ */
+
 public class sysMotorMover {
 
     private LinearOpMode myOpMode = null;  // gain access to methods in the calling OpMode.
