@@ -21,6 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 //TODO : Need to define multiple holding points. LOADING, LOADED, and UNLOADING for the ARMservo rotation
 // TODO : Need define gripper points such as OPEN and closed
 // TODO : Need to make a helper class for generic methods.
+// TODO : Need to make a constants home for robomos constants
 
 
 @TeleOp(name="Basic: Omni Linear OpMode GMZERO", group="Linear OpMode")

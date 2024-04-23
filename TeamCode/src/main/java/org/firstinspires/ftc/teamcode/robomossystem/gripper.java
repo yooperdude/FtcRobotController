@@ -1,8 +1,19 @@
 package org.firstinspires.ftc.teamcode.robomossystem;
 
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 //This class will contain the ENUM for the gripper and control the movements.
 
 public class gripper {
+
+    private Servo gripperServo;
+
+    public void init(HardwareMap hardwareMap) {
+        //Name on driver station must match exactly the name in the configuration file.
+        gripperServo = hardwareMap.get(Servo.class, "gripper_servo");
+    }
+
 
     //Define the gripper states.
     public enum GripperState {
@@ -41,7 +52,9 @@ public class gripper {
      *
      * Query the state of the gripper by calling myGripper.getGripperState();
      *
-     * Then use like gamepad.x && myGripper.getGripperState() == GripperState.OPEN then do myGripper.performGripperAction(GripperState.CLOSED);
+     * Then use like gamepad.x && myGripper.getGripperState() == GripperState.OPEN
+     * then do
+     * myGripper.performGripperAction(GripperState.CLOSED);
      *
      */
 
@@ -50,16 +63,20 @@ public class gripper {
         switch (state) {
             case OPEN:
                 //Open the gripper
+                gripperServo.setPosition(1.0);
                 openAction();
                 setGripperState(GripperState.OPEN);
                 break;
             case CLOSED:
                 //Close the gripper
+                gripperServo.setPosition(0.0);
                 closeAction();
                 setGripperState(GripperState.CLOSED);
                 break;
             case LOADED:
                 //Load the gripper
+                gripperServo.setPosition(0.5);
+                gripperServo.getPosition();
                 loadedAction();
                 setGripperState(GripperState.LOADED);
                 break;
