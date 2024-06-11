@@ -155,9 +155,9 @@ public class opmodeTeleopMain extends LinearOpMode {
                 sysDrivetrain.driveMecanumFieldCentric(inputAxial, inputLateral, inputYaw, sysDrivetrain.getValueDrivetrainOutputPower());
             }
 
-            // If gamepad cross is pressed then moveServo to 0.1, 0.1, at 0.06 speed
+            // If gamepad cross is pressed
             if(gamepad1.cross) {
-                sysMotorMover.moveServo(0.1, 0.1, 0.06);
+
             }
 
             // Button Action - Set Output Power Mode to High
