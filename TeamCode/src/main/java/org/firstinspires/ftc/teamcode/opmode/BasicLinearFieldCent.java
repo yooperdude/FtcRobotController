@@ -152,7 +152,7 @@ public class BasicLinearFieldCent extends LinearOpMode {
             double axialRotated = Math.cos(botHeading) * axial - Math.sin(botHeading) * lateral;
             double lateralRotated = Math.sin(botHeading) * axial + Math.cos(botHeading) * lateral;
 
-            //Telemetry for rotated values
+            //Telemetry for rotated values of axial and lateral
             telemetry.addData("Axial Rotated", axialRotated);
             telemetry.addData("Lateral Rotated", lateralRotated);
 
