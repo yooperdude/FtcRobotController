@@ -25,7 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 // TODO : Need to make a constants home for robomos constants
 
 
-@TeleOp(name="GMZERO Test", group="Linear OpMode")
+@TeleOp(name="Ignore No Function GMZERO Test", group="Linear OpMode")
 public class basicOmniOpModeLinearGM0 extends LinearOpMode {
 //@Disabled
 
