@@ -107,6 +107,15 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
+        //Add Telemetry for motor speeds
+        telemetry.addData("Front left/Right", "%4.2f, %4.2f", 0.0, 0.0);
+        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", 0.0, 0.0);
+        //Read encoder velocity for front motors
+
+
+
+
+
         telemetry.update();
 
         waitForStart();
@@ -178,6 +187,9 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+            telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontDrive.getPower(), rightFrontDrive.getPower());
+            //Read encoder velocity for back motors
+            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackDrive.getPower(), rightBackDrive.getPower());
             telemetry.update();
         }
     }}
