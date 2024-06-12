@@ -170,7 +170,7 @@ public class BasicLinearFieldCent extends LinearOpMode {
             //Correct for axial
             axialRotated = axialRotated * 1.1;
 
-            double speedModifier = 0.5;
+            double speedModifier = 0.5; //speed 50%
 
             double leftFrontPower  = (axialRotated + lateralRotated + yaw) / denominator * speedModifier;
             double rightFrontPower = (axialRotated - lateralRotated - yaw) / denominator * speedModifier;
