@@ -170,10 +170,12 @@ public class BasicLinearFieldCent extends LinearOpMode {
             //Correct for axial
             axialRotated = axialRotated * 1.1;
 
-            double leftFrontPower  = (axialRotated + lateralRotated + yaw) / denominator;
-            double rightFrontPower = (axialRotated - lateralRotated - yaw) / denominator;
-            double leftBackPower   = (axialRotated - lateralRotated + yaw) / denominator;
-            double rightBackPower  = (axialRotated + lateralRotated - yaw) / denominator;
+            double speedModifier = 0.5;
+
+            double leftFrontPower  = (axialRotated + lateralRotated + yaw) / denominator * speedModifier;
+            double rightFrontPower = (axialRotated - lateralRotated - yaw) / denominator * speedModifier;
+            double leftBackPower   = (axialRotated - lateralRotated + yaw) / denominator * speedModifier;
+            double rightBackPower  = (axialRotated + lateralRotated - yaw) / denominator * speedModifier;
 
 /*
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
