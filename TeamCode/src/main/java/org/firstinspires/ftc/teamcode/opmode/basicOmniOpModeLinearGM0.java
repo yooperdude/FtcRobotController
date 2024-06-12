@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 
 
@@ -24,8 +25,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 // TODO : Need to make a constants home for robomos constants
 
 
-@TeleOp(name="Basic: Omni Linear OpMode GMZERO", group="Linear OpMode")
+@TeleOp(name="GMZERO Test", group="Linear OpMode")
 public class basicOmniOpModeLinearGM0 extends LinearOpMode {
+//@Disabled
 
     //This area defines all of the servo positions that we may call. The minimum and maximum values are 0.0 and 1.0. A servo at full rotation is 1.0 and at 0.0 is at the minimum rotation.
     //Some servos move from 0 degrees to 180 degrees. Others may have 5 rotations, or 0 is zero degrees, and 1.0 is 1800 degrees.
@@ -60,7 +62,8 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    //public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
         //Get the FTC Dashboard instance.
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -68,38 +71,39 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
 
         //Declare our motors, make sure they match the configuration screen on the Driver Station
         //Here we are defining the motors and servos that we will be using. The names must match the names in the configuration screen on the Driver Station.
-        frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
-        backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
-        frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-        backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        frontLeftMotor = hardwareMap.dcMotor.get("motorFrontLeft");
+        backLeftMotor = hardwareMap.dcMotor.get("motorBackLeft");
+        frontRightMotor = hardwareMap.dcMotor.get("motorFrontRight");
+        backRightMotor = hardwareMap.dcMotor.get("motorBackRight");
 
         //Declare our servos, make sure they match the configuration screen on the Driver Station, we have a gripperServo, gripperRotationServo, planerLauncher and two armServos
-        gripperServo = hardwareMap.servo.get("gripperServo");
-        gripperRotationServo = hardwareMap.servo.get("gripperRotationServo");
-        armServo1 = hardwareMap.servo.get("armServo1");
-        armServo2 = hardwareMap.servo.get("armServo2");
-        planeLauncher = hardwareMap.servo.get("planeLauncher");
+        gripperServo = hardwareMap.servo.get("Gripper");
+        gripperRotationServo = hardwareMap.servo.get("GripperRotation");
+        armServo1 = hardwareMap.servo.get("ArmLeft");
+        armServo2 = hardwareMap.servo.get("ArmRight");
+        planeLauncher = hardwareMap.servo.get("DroneLaunch");
 
 
         //Need to reverse the right side motors. If the robot moves backwards when the left stick is pushed forward, reverse the frontRightMotor and backRightMotor
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //Initialize the pixelSensor
-        pixelSensor = hardwareMap.get(DigitalChannel.class, "pixelSensor");
-        pixelSensor.setMode(DigitalChannel.Mode.INPUT);
+        //pixelSensor = hardwareMap.get(DigitalChannel.class, "pixelSensor");
+        //pixelSensor.setMode(DigitalChannel.Mode.INPUT);
         //Initialize the armSensor
-        armSensor = hardwareMap.get(AnalogInput.class, "armSensor");
+        //armSensor = hardwareMap.get(AnalogInput.class, "armSensor");
         //Retrieve the armSensor value and scale it from 0 to 270 degrees
-        double armSensorValue = armSensor.getVoltage() * 270.0 / 3.3;
+        //double armSensorValue = armSensor.getVoltage() * 270.0 / 3.3;
 
 
         //Retrieve the IMU from the hardware map.
         IMU imu = hardwareMap.get(IMU.class, "imu");
         //Adjust the orientation of the IMU to match our configuration.
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP));
         //Without this the REV hub orientation is assumed to be Logo Up and USB Forward.
         imu.initialize(parameters);
 
@@ -202,10 +206,10 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
                 planeLauncher.setPosition(PLANE_LAUNCHER_OPEN);
             }
             //If the pixelSensor is touched then print "closed"
-            if (pixelSensor.getState() == false) {
-                telemetry.addData("DigitalTouchSensorExample", "Closed");
-            } else {
-                telemetry.addData("DigitalTouchSensorExample", "Open");
+            //if (pixelSensor.getState() == false) {
+            //    telemetry.addData("DigitalTouchSensorExample", "Closed");
+            //} else {
+            //    telemetry.addData("DigitalTouchSensorExample", "Open");
             }
 
 
@@ -215,7 +219,8 @@ public class basicOmniOpModeLinearGM0 extends LinearOpMode {
 
     }
 
-}
+
+
 
 
 
