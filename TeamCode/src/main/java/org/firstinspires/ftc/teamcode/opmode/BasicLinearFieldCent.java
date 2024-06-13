@@ -177,6 +177,18 @@ public class BasicLinearFieldCent extends LinearOpMode {
             double leftBackPower   = (axialRotated - lateralRotated + yaw) / denominator * speedModifier;
             double rightBackPower  = (axialRotated + lateralRotated - yaw) / denominator * speedModifier;
 
+            //If gamepad1 a is pressed move servotest to 0.5
+            if (gamepad1.a) {
+                servoTest.setPosition(0.5);
+            }
+
+            //If gamepad1 b is pressed move servotest to 0.0
+            if (gamepad1.b) {
+                servoTest.setPosition(0.0);
+            }
+
+
+
 /*
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
