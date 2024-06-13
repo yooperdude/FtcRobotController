@@ -41,6 +41,14 @@ package org.firstinspires.ftc.teamcode.opmode;
         import com.qualcomm.robotcore.hardware.Servo;
 
         import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+        import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+        import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+        import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+        import com.acmerobotics.dashboard.FtcDashboard;
+        import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+        import java.util.Locale;
+        import org.firstinspires.ftc.robotcore.external.Func;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -82,6 +90,9 @@ public class BasicLinearFieldCent extends LinearOpMode {
     private DcMotor rightBackDrive = null;
 
     private Servo servoTest = null;
+    Orientation angles;
+
+    private IMU imu = null;
 
     @Override
     public void runOpMode() {
@@ -94,6 +105,12 @@ public class BasicLinearFieldCent extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "motorBackRight");
 
         servoTest = hardwareMap.get(Servo.class, "servoTest");
+        //Start the composeTelemtry function.
+        composeTelemetry();
+
+        // Set up our telemetry dashboard
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        TelemetryPacket packet = new TelemetryPacket();
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -118,7 +135,7 @@ public class BasicLinearFieldCent extends LinearOpMode {
         //Read encoder velocity for front motors
 
         //Retrieve the IMU from the hardware map.
-        IMU imu = hardwareMap.get(IMU.class, "imu");
+        imu = hardwareMap.get(IMU.class, "imu");
         //Adjust the orientation of the IMU to match our configuration.
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -228,4 +245,36 @@ public class BasicLinearFieldCent extends LinearOpMode {
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackDrive.getPower(), rightBackDrive.getPower());
             telemetry.update();
         }
-    }}
+    }
+    //Set up telemetry dashboard compose function
+    void composeTelemetry() {
+
+        // At the beginning of each telemetry update, grab a bunch of data
+        // from the IMU that we will then display in separate lines.
+        telemetry.addAction(new Runnable() { @Override public void run()
+        {
+            // Acquiring the angles is relatively expensive; we don't want
+            // to do that in each of the three items that need that info, as that's
+            // three times the necessary expense.
+
+        }
+        });
+
+        //Add telemetry line for botheading
+
+
+        telemetry.addLine()
+                .addData("Bot Heading", new Func<String>() {
+                    @Override public String value() {
+                        double yawValue = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                        String yawString = Double.toString(yawValue);
+                        return yawString;
+                        //return botHeading;
+                    }
+                });
+
+
+    }
+    }
+
+
