@@ -158,6 +158,10 @@ public class BasicLinearFieldCent extends LinearOpMode {
 
             double max;
 
+            telemetry.update();
+            packet.put("heading", botHeading);
+            dashboard.sendTelemetryPacket(packet);
+
 
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
