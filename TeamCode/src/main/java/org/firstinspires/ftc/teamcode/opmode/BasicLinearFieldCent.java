@@ -160,6 +160,12 @@ public class BasicLinearFieldCent extends LinearOpMode {
 
             telemetry.update();
             packet.put("heading", botHeading);
+            packet.put("frontLeftMotor Power", leftFrontDrive.getPower());
+            packet.put("frontRightMotor Power", rightFrontDrive.getPower());
+            //Add a packet for the current robot battery voltage
+            packet.put("Battery Voltage", hardwareMap.voltageSensor.iterator().next().getVoltage());
+
+
             dashboard.sendTelemetryPacket(packet);
 
 
