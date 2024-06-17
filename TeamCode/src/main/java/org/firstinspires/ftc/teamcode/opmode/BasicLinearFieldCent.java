@@ -39,6 +39,7 @@ package org.firstinspires.ftc.teamcode.opmode;
         import com.qualcomm.robotcore.hardware.IMU;
         import com.qualcomm.robotcore.util.ElapsedTime;
         import com.qualcomm.robotcore.hardware.Servo;
+        import com.qualcomm.robotcore.hardware.DcMotorEx;
 
         import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
         import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -49,6 +50,7 @@ package org.firstinspires.ftc.teamcode.opmode;
         import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
         import java.util.Locale;
         import org.firstinspires.ftc.robotcore.external.Func;
+
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -82,7 +84,7 @@ package org.firstinspires.ftc.teamcode.opmode;
 //@Disabled
 public class BasicLinearFieldCent extends LinearOpMode {
 
-    // Declare OpMode members for each of the 4 motors.
+    // Motor locations defined below. .
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
@@ -106,7 +108,7 @@ public class BasicLinearFieldCent extends LinearOpMode {
 
         servoTest = hardwareMap.get(Servo.class, "servoTest");
         //Start the composeTelemtry function.
-        composeTelemetry();
+        //composeTelemetry();
 
         // Set up our telemetry dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -193,6 +195,8 @@ public class BasicLinearFieldCent extends LinearOpMode {
             if (gamepad1.back) {
                 imu.resetYaw();
             }
+            //Get servo position for servoTest and send it to the dashboard
+            packet.put("Servo Position", servoTest.getPosition());
 
             //Correct for axial
             axialRotated = axialRotated * 1.1;
@@ -204,9 +208,10 @@ public class BasicLinearFieldCent extends LinearOpMode {
             double leftBackPower   = (axialRotated - lateralRotated + yaw) / denominator * speedModifier;
             double rightBackPower  = (axialRotated + lateralRotated - yaw) / denominator * speedModifier;
 
-            //If gamepad1 a is pressed move servotest to 0.5
+            //If gamepad1 a is pressed move servotest to 0.05
+            //Servo is a 5 rotation servo so 1 rotation is 360 degrees and 0.05 is 18 degrees
             if (gamepad1.a) {
-                servoTest.setPosition(0.5);
+                servoTest.setPosition(0.05);
             }
 
             //If gamepad1 b is pressed move servotest to 0.0
