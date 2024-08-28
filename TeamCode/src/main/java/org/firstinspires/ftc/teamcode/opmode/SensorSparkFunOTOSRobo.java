@@ -15,6 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 
 /*
  * This OpMode illustrates how to use the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS)
@@ -34,6 +37,7 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        FtcDashboard dashboard = FtcDashboard.getInstance();
         // Get a reference to the sensor
         myOtos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
 
@@ -41,14 +45,6 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
         configureOtos();
         myOtos.calibrateImu();
         //Initialize the dashboard
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        TelemetryPacket packet = new TelemetryPacket();
-
-        //Add telemetry data for the OTOS X, Y, and Heading
-        packet.put("X coordinate", myOtos.getPosition().x);
-        packet.put("Y coordinate", myOtos.getPosition().y);
-        packet.put("Heading angle", myOtos.getPosition().h);
-
 
 
         // Wait for the start button to be pressed
@@ -60,6 +56,8 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
             // heading angle
             SparkFunOTOS.Pose2D pos = myOtos.getPosition();
 
+            TelemetryPacket packet = new TelemetryPacket();
+
             // Reset the tracking if the user requests it
             if (gamepad1.y) {
                 myOtos.resetTracking();
@@ -70,20 +68,35 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
                 myOtos.calibrateImu();
             }
 
+            //Add telemetry data for the OTOS X, Y, and Heading
+            packet.put("X coordinate", pos.x);
+            packet.put("Y coordinate", pos.y);
+            packet.put("Heading angle", pos.h);
+
+            //Send the telemetry packet to the dashboard
+            dashboard.sendTelemetryPacket(packet);
+
+            telemetry.addData("X coordinate Top", pos.x);
+            telemetry.addData("Y coordinate", pos.y);
+            telemetry.addData("Heading angle", pos.h);
+
+
+
             // Inform user of available controls
             telemetry.addLine("Press Y (triangle) on Gamepad to reset tracking");
             telemetry.addLine("Press X (square) on Gamepad to calibrate the IMU");
+            telemetry.addLine("Version check.");
             telemetry.addLine();
 
             // Log the position to the telemetry
-            telemetry.addData("X coordinate", pos.x);
+            telemetry.addData("X coordinate bottom", pos.x);
             telemetry.addData("Y coordinate", pos.y);
             telemetry.addData("Heading angle", pos.h);
 
             // Update the telemetry on the driver station
             telemetry.update();
-            //Update the dashboard
-            dashboard.sendTelemetryPacket(packet);
+
+
 
         }
     }
