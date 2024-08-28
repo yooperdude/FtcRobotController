@@ -13,6 +13,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+
 /*
  * This OpMode illustrates how to use the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS)
  *
@@ -37,6 +40,16 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
         // All the configuration for the OTOS is done in this helper method, check it out!
         configureOtos();
         myOtos.calibrateImu();
+        //Initialize the dashboard
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        TelemetryPacket packet = new TelemetryPacket();
+
+        //Add telemetry data for the OTOS X, Y, and Heading
+        packet.put("X coordinate", myOtos.getPosition().x);
+        packet.put("Y coordinate", myOtos.getPosition().y);
+        packet.put("Heading angle", myOtos.getPosition().h);
+
+
 
         // Wait for the start button to be pressed
         waitForStart();
@@ -69,6 +82,9 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
 
             // Update the telemetry on the driver station
             telemetry.update();
+            //Update the dashboard
+            dashboard.sendTelemetryPacket(packet);
+
         }
     }
 
