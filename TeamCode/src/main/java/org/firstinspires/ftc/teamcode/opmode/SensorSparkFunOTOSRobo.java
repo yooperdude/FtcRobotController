@@ -23,9 +23,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  *
  * See the sensor's product page: https://www.sparkfun.com/products/24904
  */
-@TeleOp(name = "Sensor: SparkFun OTOS", group = "Sensor")
-@Disabled
-public class SensorSparkFunOTOS extends LinearOpMode {
+@TeleOp(name = "Sensor: SparkFun OTOS Robomos", group = "Sensor")
+//@Disabled
+public class SensorSparkFunOTOSRobo extends LinearOpMode {
     // Create an instance of the sensor
     SparkFunOTOS myOtos;
 
@@ -36,6 +36,7 @@ public class SensorSparkFunOTOS extends LinearOpMode {
 
         // All the configuration for the OTOS is done in this helper method, check it out!
         configureOtos();
+        myOtos.calibrateImu();
 
         // Wait for the start button to be pressed
         waitForStart();
