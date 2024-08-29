@@ -9,6 +9,7 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -17,6 +18,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+
+import java.util.concurrent.TimeUnit;
 
 
 /*
@@ -35,8 +39,16 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
     // Create an instance of the sensor
     SparkFunOTOS myOtos;
 
+    private final int READ_PERIOD = 1;
+
+    private HuskyLens huskyLens;
+
     @Override
     public void runOpMode() throws InterruptedException {
+        huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
+        Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.SECONDS);
+        rateLimit.expire();
+
         FtcDashboard dashboard = FtcDashboard.getInstance();
         // Get a reference to the sensor
         myOtos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
@@ -46,6 +58,14 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
         myOtos.calibrateImu();
         //Initialize the dashboard
 
+        if (!huskyLens.knock()) {
+            telemetry.addData(">>", "Problem communicating with " + huskyLens.getDeviceName());
+        } else {
+            telemetry.addData(">>", "Press start to continue");
+        }
+
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION);
+        telemetry.update();
 
         // Wait for the start button to be pressed
         waitForStart();
@@ -66,6 +86,18 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
             // Re-calibrate the IMU if the user requests it
             if (gamepad1.x) {
                 myOtos.calibrateImu();
+            }
+
+            if (!rateLimit.hasExpired()) {
+                continue;
+            }
+            rateLimit.reset();
+
+            HuskyLens.Block[] blocks = huskyLens.blocks();
+            telemetry.addData("Block count", blocks.length);
+            for (int i = 0; i < blocks.length; i++) {
+                telemetry.addData("Block", blocks[i].toString());
+                packet.put("Block", blocks[i].toString());
             }
 
             //Add telemetry data for the OTOS X, Y, and Heading
