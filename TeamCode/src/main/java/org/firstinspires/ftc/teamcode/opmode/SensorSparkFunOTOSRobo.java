@@ -6,7 +6,6 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
@@ -16,8 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
@@ -213,5 +211,8 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
         telemetry.addLine(String.format("OTOS Hardware Version: v%d.%d", hwVersion.major, hwVersion.minor));
         telemetry.addLine(String.format("OTOS Firmware Version: v%d.%d", fwVersion.major, fwVersion.minor));
         telemetry.update();
+    }
+
+    public static class helperOtosClass {
     }
 }

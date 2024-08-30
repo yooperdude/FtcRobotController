@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utility.enumStateDrivetrainMode;
 import org.firstinspires.ftc.teamcode.utility.utilRobotConstants;
 
 @TeleOp(name="TTT: Drivetrain Mecanum", group="training")
-//@Disabled
+@Disabled
 public class opmodeTeleopMain extends LinearOpMode {
     // ------------------------------------------------------------
     // System(s) - Define system and create instance of each system
