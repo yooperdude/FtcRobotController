@@ -265,8 +265,8 @@ public class SimplifiedOdometryRobot {
         double rawStrafeOdometer = pos.y;
 
 
-        driveDistance = (rawDriveOdometer - driveOdometerOffset);
-        strafeDistance = (rawStrafeOdometer - strafeOdometerOffset);
+        double driveDistance = (rawDriveOdometer - driveOdometerOffset);
+        double strafeDistance = (rawStrafeOdometer - strafeOdometerOffset);
 
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
@@ -410,11 +410,13 @@ public class SimplifiedOdometryRobot {
         leftBackDrive.setPower(lB);
         rightBackDrive.setPower(rB);
 
-        if (showTelemetry) {
+ /*       if (showTelemetry) {
             myOpMode.telemetry.addData("Axes D:S:Y", "%5.2f %5.2f %5.2f", drive, strafe, yaw);
             myOpMode.telemetry.addData("Wheels lf:rf:lb:rb", "%5.2f %5.2f %5.2f %5.2f", lF, rF, lB, rB);
             myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
         }
+
+  */
     }
 
     /**
