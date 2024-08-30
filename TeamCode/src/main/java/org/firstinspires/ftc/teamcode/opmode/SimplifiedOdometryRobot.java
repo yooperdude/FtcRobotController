@@ -85,7 +85,7 @@ public class SimplifiedOdometryRobot {
     private double headingOffset    = 0; // Used to offset heading
 
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
-    private boolean showTelemetry     = true;
+    private boolean showTelemetry     = false;
 
     // Robot Constructor
     public SimplifiedOdometryRobot(LinearOpMode opmode) {
