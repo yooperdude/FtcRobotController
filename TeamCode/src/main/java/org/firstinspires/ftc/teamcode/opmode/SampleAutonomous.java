@@ -31,7 +31,7 @@ public class SampleAutonomous extends LinearOpMode
 
         // Wait for driver to press start
         //telemetry.addData(">", "Touch Play to run Auto");
-        //telemetry.update();
+       // telemetry.update();
 
         waitForStart();
         robot.resetHeading();  // Reset heading to set a baseline for Auto
