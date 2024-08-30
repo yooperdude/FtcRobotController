@@ -85,7 +85,7 @@ public class SimplifiedOdometryRobot {
     private double headingOffset    = 0; // Used to offset heading
 
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
-    private boolean showTelemetry     = false;
+    private boolean showTelemetry     = true;
 
     // Robot Constructor
     public SimplifiedOdometryRobot(LinearOpMode opmode) {
@@ -96,7 +96,7 @@ public class SimplifiedOdometryRobot {
      * Robot Initialization:
      *  Use the hardware map to Connect to devices.
      *  Perform any set-up all the hardware devices.
-     * @param showTelemetry  Set to true if you want telemetry to be displayed by the robot sensor/drive functions.
+     * param showTelemetry  Set to true if you want telemetry to be displayed by the robot sensor/drive functions.
      */
 
     private void configureOtos() {
@@ -410,13 +410,13 @@ public class SimplifiedOdometryRobot {
         leftBackDrive.setPower(lB);
         rightBackDrive.setPower(rB);
 
- /*       if (showTelemetry) {
-            myOpMode.telemetry.addData("Axes D:S:Y", "%5.2f %5.2f %5.2f", drive, strafe, yaw);
-            myOpMode.telemetry.addData("Wheels lf:rf:lb:rb", "%5.2f %5.2f %5.2f %5.2f", lF, rF, lB, rB);
-            myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
-        }
+        if (showTelemetry) {
+            //myOpMode.telemetry.addData("Axes D:S:Y", "%5.2f %5.2f %5.2f", drive, strafe, yaw);
+            //myOpMode.telemetry.addData("Wheels lf:rf:lb:rb", "%5.2f %5.2f %5.2f %5.2f", lF, rF, lB, rB);
+          //show x otos position in telemtry
 
-  */
+            //myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
+        }
     }
 
     /**
@@ -435,6 +435,7 @@ public class SimplifiedOdometryRobot {
         driveOdometerOffset = rawDriveOdometer;
         driveDistance = 0.0;
         driveController.reset(0);
+        myOtos.resetTracking();
 
         strafeOdometerOffset = rawStrafeOdometer;
         strafeDistance = 0.0;
