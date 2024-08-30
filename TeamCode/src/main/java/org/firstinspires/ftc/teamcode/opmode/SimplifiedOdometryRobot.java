@@ -85,7 +85,7 @@ public class SimplifiedOdometryRobot {
     private double headingOffset    = 0; // Used to offset heading
 
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
-    private boolean showTelemetry     = false;
+    private boolean showTelemetry     = true;
 
     // Robot Constructor
     public SimplifiedOdometryRobot(LinearOpMode opmode) {
@@ -220,8 +220,8 @@ public class SimplifiedOdometryRobot {
         // TODO Need to verify IMU orientation on robot
         // Tell the software how the Control Hub is mounted on the robot to align the IMU XYZ axes correctly
         RevHubOrientationOnRobot orientationOnRobot =
-                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         // zero out all the odometry readings.
@@ -260,12 +260,13 @@ public class SimplifiedOdometryRobot {
 
         SparkFunOTOS.Pose2D pos = myOtos.getPosition();
 
+
         double rawDriveOdometer = pos.x;
         double rawStrafeOdometer = pos.y;
 
 
-//        driveDistance = (rawDriveOdometer - driveOdometerOffset) * ODOM_INCHES_PER_COUNT;
-//        strafeDistance = (rawStrafeOdometer - strafeOdometerOffset) * ODOM_INCHES_PER_COUNT;
+        driveDistance = (rawDriveOdometer - driveOdometerOffset);
+        strafeDistance = (rawStrafeOdometer - strafeOdometerOffset);
 
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
@@ -425,6 +426,7 @@ public class SimplifiedOdometryRobot {
 
     /**
      * Set odometry counts and distances to zero.
+     * TODO Need to check that the reset works as intended with the OTOS sensor.
      */
     public void resetOdometry() {
         readSensors();
