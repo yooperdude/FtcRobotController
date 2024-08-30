@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.system.sysDrivetrainMecanum;
-import org.firstinspires.ftc.teamcode.system.sysMotorMover;
 import org.firstinspires.ftc.teamcode.system.sysLighting;
 import org.firstinspires.ftc.teamcode.utility.enumStateDriveMotorMaxOutputPower;
 import org.firstinspires.ftc.teamcode.utility.enumStateDrivetrainMode;
@@ -15,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utility.utilRobotConstants;
 
 @TeleOp(name="TTT: Drivetrain Mecanum", group="training")
 @Disabled
-public class opmodeTeleopMain extends LinearOpMode {
+public class ExampleOnlypmodeTeleopMain extends LinearOpMode {
     // ------------------------------------------------------------
     // System(s) - Define system and create instance of each system
     // ------------------------------------------------------------
