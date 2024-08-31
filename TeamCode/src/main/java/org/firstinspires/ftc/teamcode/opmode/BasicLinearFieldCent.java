@@ -80,7 +80,7 @@ package org.firstinspires.ftc.teamcode.opmode;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic Field Cent", group="Linear OpMode")
+@TeleOp(name="MOBots Core Basic Field Centered Template", group="Linear OpMode")
 //@Disabled
 public class BasicLinearFieldCent extends LinearOpMode {
 

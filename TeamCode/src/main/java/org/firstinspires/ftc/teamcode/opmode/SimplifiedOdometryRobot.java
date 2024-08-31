@@ -77,10 +77,10 @@ public class SimplifiedOdometryRobot {
     private IMU imu;
     private ElapsedTime holdTimer = new ElapsedTime();  // User for any motion requiring a hold time or timeout.
 
-    private int rawDriveOdometer    = 0; // Unmodified axial odometer count
-    private int driveOdometerOffset = 0; // Used to offset axial odometer
-    private int rawStrafeOdometer   = 0; // Unmodified lateral odometer count
-    private int strafeOdometerOffset= 0; // Used to offset lateral odometer
+    private double rawDriveOdometer    = 0; // Unmodified axial odometer count
+    private double driveOdometerOffset = 0; // Used to offset axial odometer
+    private double rawStrafeOdometer   = 0; // Unmodified lateral odometer count
+    private double strafeOdometerOffset= 0; // Used to offset lateral odometer
     private double rawHeading       = 0; // Unmodified heading (degrees)
     private double headingOffset    = 0; // Used to offset heading
 
@@ -252,17 +252,18 @@ public class SimplifiedOdometryRobot {
      * @return true
      */
     public boolean readSensors() {
-        //Removed reference to rawDrive and rawStrafe as they come from the encoders
-        //rawDriveOdometer = driveEncoder.getCurrentPosition() * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
-        //rawStrafeOdometer = strafeEncoder.getCurrentPosition() * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
-
-        //Units from the OTOS. TODO need to verify!
-
         SparkFunOTOS.Pose2D pos = myOtos.getPosition();
+        //Removed reference to rawDrive and rawStrafe as they come from the encoders
+        rawDriveOdometer = pos.x * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
+        rawStrafeOdometer = pos.y * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
 
 
-        double rawDriveOdometer = pos.x;
-        double rawStrafeOdometer = pos.y;
+
+
+
+
+      //  double rawDriveOdometer = pos.x;
+      //  double rawStrafeOdometer = pos.y;
 
 
         double driveDistance = (rawDriveOdometer - driveOdometerOffset);
