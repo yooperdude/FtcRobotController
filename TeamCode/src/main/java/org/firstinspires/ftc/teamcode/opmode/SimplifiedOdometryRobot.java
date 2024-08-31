@@ -100,8 +100,8 @@ public class SimplifiedOdometryRobot {
      */
 
     private void configureOtos() {
-        //telemetry.addLine("Configuring OTOS...");
-        //telemetry.update();
+        myOpMode.telemetry.addLine("Configuring OTOS...");
+        myOpMode.telemetry.update();
 
         // Set the desired units for linear and angular measurements. Can be either
         // meters or inches for linear, and radians or degrees for angular. If not
@@ -174,14 +174,14 @@ public class SimplifiedOdometryRobot {
         SparkFunOTOS.Version fwVersion = new SparkFunOTOS.Version();
         myOtos.getVersionInfo(hwVersion, fwVersion);
 
-       /* telemetry.addLine("OTOS configured! Press start to get position data!");
-        telemetry.addLine();
-        telemetry.addLine(String.format("OTOS Hardware Version: v%d.%d", hwVersion.major, hwVersion.minor));
-        telemetry.addLine(String.format("OTOS Firmware Version: v%d.%d", fwVersion.major, fwVersion.minor));
-        telemetry.update();
-        */
+        myOpMode.telemetry.addLine("OTOS configured! Press start to get position data!");
 
-        myOpMode.telemetry.addData("Status","OTOS configured! Press start to get position data!");
+        myOpMode.telemetry.addLine(String.format("OTOS Hardware Version: v%d.%d", hwVersion.major, hwVersion.minor));
+        myOpMode.telemetry.addLine(String.format("OTOS Firmware Version: v%d.%d", fwVersion.major, fwVersion.minor));
+        myOpMode.telemetry.update();
+
+
+        //myOpMode.telemetry.addData("Status","OTOS configured! Press start to get position data!");
     }
     public void initialize(boolean showTelemetry)
     {
@@ -257,14 +257,8 @@ public class SimplifiedOdometryRobot {
         rawDriveOdometer = pos.x * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
         rawStrafeOdometer = pos.y * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
 
-
-
-
-
-
       //  double rawDriveOdometer = pos.x;
       //  double rawStrafeOdometer = pos.y;
-
 
         double driveDistance = (rawDriveOdometer - driveOdometerOffset);
         double strafeDistance = (rawStrafeOdometer - strafeOdometerOffset);
@@ -441,6 +435,7 @@ public class SimplifiedOdometryRobot {
         strafeOdometerOffset = rawStrafeOdometer;
         strafeDistance = 0.0;
         strafeController.reset(0);
+        myOtos.resetTracking();
     }
 
     /**
