@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 public class SimplifiedOdometryRobot {
     // Adjust these numbers to suit your robot.
     private final double ODOM_INCHES_PER_COUNT   = 0.002969;   //  GoBilda Odometry Pod (1/226.8)
-    private final boolean INVERT_DRIVE_ODOMETRY  = true;       //  When driving FORWARD, the odometry value MUST increase.  If it does not, flip the value of this constant.
-    private final boolean INVERT_STRAFE_ODOMETRY = true;       //  When strafing to the LEFT, the odometry value MUST increase.  If it does not, flip the value of this constant.
+    private final boolean INVERT_DRIVE_ODOMETRY  = false;       //  When driving FORWARD, the odometry value MUST increase.  If it does not, flip the value of this constant.
+    private final boolean INVERT_STRAFE_ODOMETRY = false;       //  When strafing to the LEFT, the odometry value MUST increase.  If it does not, flip the value of this constant.
 
     private static final double DRIVE_GAIN          = 0.03;    // Strength of axial position control
     private static final double DRIVE_ACCEL         = 2.0;     // Acceleration limit.  Percent Power change per second.  1.0 = 0-100% power in 1 sec.
@@ -178,6 +178,8 @@ public class SimplifiedOdometryRobot {
 
         myOpMode.telemetry.addLine(String.format("OTOS Hardware Version: v%d.%d", hwVersion.major, hwVersion.minor));
         myOpMode.telemetry.addLine(String.format("OTOS Firmware Version: v%d.%d", fwVersion.major, fwVersion.minor));
+
+
         myOpMode.telemetry.update();
 
 
@@ -189,7 +191,7 @@ public class SimplifiedOdometryRobot {
         // motor/device must match the names assigned during the robot configuration.
 
         // !!!  Set the drive direction to ensure positive power drives each wheel forward.
-        leftFrontDrive  = setupDriveMotor("leftfront_drive", DcMotor.Direction.REVERSE);
+        leftFrontDrive  = setupDriveMotor("leftfront_drive", DcMotor.Direction.FORWARD);
         rightFrontDrive = setupDriveMotor("rightfront_drive", DcMotor.Direction.FORWARD);
         leftBackDrive  = setupDriveMotor( "leftback_drive", DcMotor.Direction.REVERSE);
         rightBackDrive = setupDriveMotor( "rightback_drive",DcMotor.Direction.FORWARD);
@@ -206,11 +208,10 @@ public class SimplifiedOdometryRobot {
         rateLimit.expire();
 
         myOtos = myOpMode.hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
-
         configureOtos();
 
         myOtos.calibrateImu();
-
+        myOtos.resetTracking();
 
         // Set all hubs to use the AUTO Bulk Caching mode for faster encoder reads
         List<LynxModule> allHubs = myOpMode.hardwareMap.getAll(LynxModule.class);
@@ -229,6 +230,8 @@ public class SimplifiedOdometryRobot {
 
         // Set the desired telemetry state
         this.showTelemetry = showTelemetry;
+        myOpMode.telemetry.addData("Status", "Master Initialize Done");
+        myOpMode.telemetry.update();
     }
 
     /**
@@ -254,14 +257,17 @@ public class SimplifiedOdometryRobot {
     public boolean readSensors() {
         SparkFunOTOS.Pose2D pos = myOtos.getPosition();
         //Removed reference to rawDrive and rawStrafe as they come from the encoders
-        rawDriveOdometer = pos.x * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
-        rawStrafeOdometer = pos.y * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
+        rawDriveOdometer = pos.y * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
+        rawStrafeOdometer = pos.x * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
 
       //  double rawDriveOdometer = pos.x;
       //  double rawStrafeOdometer = pos.y;
 
         double driveDistance = (rawDriveOdometer - driveOdometerOffset);
+        //double driveDistance = (rawDriveOdometer);
+
         double strafeDistance = (rawStrafeOdometer - strafeOdometerOffset);
+        //double strafeDistance = (rawStrafeOdometer);
 
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
@@ -271,9 +277,19 @@ public class SimplifiedOdometryRobot {
         turnRate    = angularVelocity.zRotationRate;
 
         if (showTelemetry) {
-            myOpMode.telemetry.addData("Odom Ax:Lat", "%6.2f %6.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
-            myOpMode.telemetry.addData("Dist Ax:Lat", "%5.2f %5.2f", driveDistance, strafeDistance);
+            myOpMode.telemetry.addData("Odom X:Y", "%6.2f %6.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
+            myOpMode.telemetry.addData("Dist Drive : Strafe", "%5.2f %5.2f", driveDistance, strafeDistance);
             myOpMode.telemetry.addData("Head Deg:Rate", "%5.2f %5.2f", heading, turnRate);
+            myOpMode.telemetry.addData("IMU Head", "%5.2f", rawHeading);
+            //Read raw odometry values from the OTOS sensor
+            myOpMode.telemetry.addData("OTOS Pos.X: Pos.yY:Pos.Head", "%.2f %.2f %.2f", pos.x, pos.y, pos.h);
+            myOpMode.telemetry.addLine("Driving");
+            myOpMode.telemetry.addData("driveController.inPosition()", driveController.inPosition());
+            myOpMode.telemetry.addData("yawController.inPosition()", yawController.inPosition());
+            myOpMode.telemetry.addData("error", driveController.getSetpoint() - driveDistance);
+            //telemetry for the getOutput method
+            myOpMode.telemetry.addData("driveController.getOutput()", driveController.getOutput(driveDistance));
+            myOpMode.telemetry.update();
 
         }
         return true;  // do this so this function can be included in the condition for a while loop to keep values fresh.
@@ -299,6 +315,15 @@ public class SimplifiedOdometryRobot {
 
             // implement desired axis powers
             moveRobot(driveController.getOutput(driveDistance), strafeController.getOutput(strafeDistance), yawController.getOutput(heading));
+           /* myOpMode.telemetry.addLine("Driving");
+            myOpMode.telemetry.addData("driveController.inPosition()", driveController.inPosition());
+            myOpMode.telemetry.addData("yawController.inPosition()", yawController.inPosition());
+            myOpMode.telemetry.addData("error", driveController.getSetpoint() - driveDistance);
+            //telemetry for the getOutput method
+            myOpMode.telemetry.addData("driveController.getOutput()", driveController.getOutput(driveDistance));
+            myOpMode.telemetry.update();
+            */
+
 
             // Time to exit?
             if (driveController.inPosition() && yawController.inPosition()) {
@@ -430,12 +455,12 @@ public class SimplifiedOdometryRobot {
         driveOdometerOffset = rawDriveOdometer;
         driveDistance = 0.0;
         driveController.reset(0);
-        myOtos.resetTracking();
+        //myOtos.resetTracking();
 
         strafeOdometerOffset = rawStrafeOdometer;
         strafeDistance = 0.0;
         strafeController.reset(0);
-        myOtos.resetTracking();
+        //myOtos.resetTracking();
     }
 
     /**

@@ -26,16 +26,18 @@ public class SampleAutonomous extends LinearOpMode
     {
         // Initialize the robot hardware & Turn on telemetry
         robot.initialize(true);
+        //telemetry.addData("Status", "Initialized");
+        //telemetry.update();
 
         // Wait for driver to press start
         //telemetry.addData(">", "Touch Play to run Auto");
        // telemetry.update();
 
         waitForStart();
-        robot.resetHeading();  // Reset heading to set a baseline for Auto
-        telemetry.addData(">", "Auto Started");
-        telemetry.addData("Heading", robot.getHeading());
-        telemetry.update();
+       // robot.resetHeading();  // Reset heading to set a baseline for Auto
+       // telemetry.addData(">", "Auto Started");
+       // telemetry.addData("Heading", robot.getHeading());
+       // telemetry.update();
 
         // Run Auto if stop was not pressed.
         if (opModeIsActive())
@@ -43,13 +45,13 @@ public class SampleAutonomous extends LinearOpMode
             // Note, this example takes more than 30 seconds to execute, so turn OFF the auto timer.
 
             // Drive a large rectangle, turning at each corner
-            robot.drive(  1, 0.60, 0.25);
+            robot.drive(  1.0, 0.60, 0.25);
             robot.turnTo(90, 0.45, 0.5);
-            robot.drive(  1, 0.60, 0.25);
+            robot.drive(  1.0, 0.60, 0.25);
             robot.turnTo(180, 0.45, 0.5);
-            robot.drive(  1, 0.60, 0.25);
+            robot.drive(  1.0, 0.60, 0.25);
             robot.turnTo(270, 0.45, 0.5);
-            robot.drive(  1, 0.60, 0.25);
+            robot.drive(  1.0, 0.60, 0.25);
             robot.turnTo(0, 0.45, 0.5);
 
 
