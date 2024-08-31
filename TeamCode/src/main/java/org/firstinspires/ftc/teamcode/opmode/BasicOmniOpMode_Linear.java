@@ -108,9 +108,12 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         //Add Telemetry for motor speeds
-        telemetry.addData("Front left/Right", "%4.2f, %4.2f", 0.0, 0.0);
-        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", 0.0, 0.0);
+        //telemetry.addData("Front left/Right", "%4.2f, %4.2f", 0.0, 0.0);
+        //telemetry.addData("Back  left/Right", "%4.2f, %4.2f", 0.0, 0.0);
         //Read encoder velocity for front motors
+        //telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition());
+        //Read encoder velocity for back motors
+       // telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackDrive.getCurrentPosition(), rightBackDrive.getCurrentPosition());
 
 
 
@@ -187,9 +190,21 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-            telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontDrive.getPower(), rightFrontDrive.getPower());
+            //telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontDrive.getPower(), rightFrontDrive.getPower());
             //Read encoder velocity for back motors
-            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackDrive.getPower(), rightBackDrive.getPower());
+            //telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackDrive.getPower(), rightBackDrive.getPower());
+            //read current position
+            double position = leftBackDrive.getCurrentPosition();
+            double position2 = leftFrontDrive.getCurrentPosition();
+            double position3 = rightBackDrive.getCurrentPosition();
+            double position4 = rightFrontDrive.getCurrentPosition();
+          //  telemetry.addData("Front left/Right", "%4.2, %4.2", leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition());
+            //telemetry.addData("back left/Right", "%4.2, %4.2", rightBackDrive.getCurrentPosition(), leftBackDrive.getCurrentPosition());
+            telemetry.addData("position", position);
+            telemetry.addData("position 2", position2);
+            telemetry.addData("position 3", position3);
+            telemetry.addData("position 4", position4);
+
             telemetry.update();
         }
     }}
