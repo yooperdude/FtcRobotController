@@ -280,6 +280,7 @@ public class SimplifiedOdometryRobot {
             myOpMode.telemetry.addData("Odom Ax:Lat", "%6.2f %6.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
             myOpMode.telemetry.addData("Dist Ax:Lat", "%5.2f %5.2f", driveDistance, strafeDistance);
             myOpMode.telemetry.addData("Head Deg:Rate", "%5.2f %5.2f", heading, turnRate);
+
         }
         return true;  // do this so this function can be included in the condition for a while loop to keep values fresh.
     }

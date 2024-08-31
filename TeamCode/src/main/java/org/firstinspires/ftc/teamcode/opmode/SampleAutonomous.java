@@ -4,12 +4,10 @@
     See the readme for a link to a video tutorial explaining the operation and limitations of the code.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import org.firstinspires.ftc.teamcode.opmode.SimplifiedOdometryRobot;
 
 /*
  * This OpMode illustrates an autonomous opmode using simple Odometry
@@ -35,12 +33,15 @@ public class SampleAutonomous extends LinearOpMode
 
         waitForStart();
         robot.resetHeading();  // Reset heading to set a baseline for Auto
+        telemetry.addData(">", "Auto Started");
+        telemetry.addData("Heading", robot.getHeading());
+        telemetry.update();
 
         // Run Auto if stop was not pressed.
         if (opModeIsActive())
         {
             // Note, this example takes more than 30 seconds to execute, so turn OFF the auto timer.
-/*
+
             // Drive a large rectangle, turning at each corner
             robot.drive(  1, 0.60, 0.25);
             robot.turnTo(90, 0.45, 0.5);
@@ -50,7 +51,7 @@ public class SampleAutonomous extends LinearOpMode
             robot.turnTo(270, 0.45, 0.5);
             robot.drive(  1, 0.60, 0.25);
             robot.turnTo(0, 0.45, 0.5);
-            */
+
 
 
             sleep(500);
