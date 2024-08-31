@@ -289,6 +289,8 @@ public class SimplifiedOdometryRobot {
             myOpMode.telemetry.addData("error", driveController.getSetpoint() - driveDistance);
             //telemetry for the getOutput method
             myOpMode.telemetry.addData("driveController.getOutput()", driveController.getOutput(driveDistance));
+            double driveError = driveController.getSetpoint() - driveDistance;
+            myOpMode.telemetry.addData("DriveError", driveError);
             myOpMode.telemetry.update();
 
         }
@@ -504,6 +506,7 @@ class ProportionalControl {
     boolean circular;
     boolean inPosition;
     ElapsedTime cycleTime = new ElapsedTime();
+    LinearOpMode myOpMode;
 
     public ProportionalControl(double gain, double accelLimit, double outputLimit, double tolerance, double deadband, boolean circular) {
         this.gain = gain;
@@ -513,6 +516,7 @@ class ProportionalControl {
         this.tolerance = tolerance;
         this.deadband = deadband;
         this.circular = circular;
+        //this.myOpMode = opMode;
         reset(0.0);
     }
 
@@ -535,6 +539,9 @@ class ProportionalControl {
 
         inPosition = (Math.abs(error) < tolerance);
 
+
+
+
         // Prevent any very slow motor output accumulation
         if (Math.abs(error) <= deadband) {
             output = 0;
@@ -553,6 +560,8 @@ class ProportionalControl {
 
         lastOutput = output;
         cycleTime.reset();
+
+
         return output;
     }
 
