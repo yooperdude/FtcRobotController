@@ -16,28 +16,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  * The IMU gyro is used to stabilize the heading during all motions
  */
 
-@Autonomous(name="Sample Autonomous for OTOS Sensor", group = "Mr. Phil")
+@Autonomous(name="Next Try Sample Autonomous for OTOS Sensor", group = "Mr. Phil")
 public class SampleAutonomous extends LinearOpMode
 {
     // get an instance of the "Robot" class.
-    private SimplifiedOdometryRobot robot = new SimplifiedOdometryRobot(this);
+    private NextTrySimplifiedOdometryRobot robot = new NextTrySimplifiedOdometryRobot(this);
 
     @Override public void runOpMode()
     {
         // Initialize the robot hardware & Turn on telemetry
         robot.initialize(true);
-        //telemetry.addData("Status", "Initialized");
-        //telemetry.update();
-
-        // Wait for driver to press start
-        //telemetry.addData(">", "Touch Play to run Auto");
-       // telemetry.update();
 
         waitForStart();
-       // robot.resetHeading();  // Reset heading to set a baseline for Auto
-       // telemetry.addData(">", "Auto Started");
-       // telemetry.addData("Heading", robot.getHeading());
-       // telemetry.update();
 
         // Run Auto if stop was not pressed.
         if (opModeIsActive())
@@ -45,7 +35,17 @@ public class SampleAutonomous extends LinearOpMode
             // Note, this example takes more than 30 seconds to execute, so turn OFF the auto timer.
 
             // Drive a large rectangle, turning at each corner
-            robot.drive(  6.0, 0.80, 0.25);
+
+            robot.drive(  5.0, 0.60, 0.25);
+            robot.strafe(  5.0, 0.60, 0.25);
+            robot.drive(  -5.0, 0.60, 0.25);
+            robot.strafe(  -5.0, 0.60, 0.25);
+
+
+/*
+            robot.drive(  1.0, 0.80, 0.25);
+            telemetry.addLine("First X done");
+            telemetry.update();
             robot.turnTo(90, 0.45, 0.5);
             robot.drive(  1.0, 0.60, 0.25);
             robot.turnTo(180, 0.45, 0.5);
@@ -53,16 +53,16 @@ public class SampleAutonomous extends LinearOpMode
             robot.turnTo(270, 0.45, 0.5);
             robot.drive(  1.0, 0.60, 0.25);
             robot.turnTo(0, 0.45, 0.5);
-
+*/
 
 
             sleep(500);
 
             // Drive the path again without turning.
-            robot.drive(  1, 0.60, 0.15);
-            robot.strafe( 1, 0.60, 0.15);
-            robot.drive( -1, 0.60, 0.15);
-            robot.strafe(-1, 0.60, 0.15);
+            //robot.drive(  1, 0.60, 0.15);
+            //robot.strafe( -1, 0.60, 0.15);
+            //robot.drive( -1, 0.60, 0.15);
+            //robot.strafe(1, 0.60, 0.15);
         }
     }
 }
