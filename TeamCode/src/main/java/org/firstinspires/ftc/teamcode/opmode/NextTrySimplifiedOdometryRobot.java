@@ -94,6 +94,7 @@ public class NextTrySimplifiedOdometryRobot {
 
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
     private double otosTurn           = 0; // Latest Robot Turn Rate from OTOS
+    private double otosHead           = 0; // Latest Robot Head from OTOS
     private boolean showTelemetry     = true;
 
     // Robot Constructor
@@ -104,7 +105,7 @@ public class NextTrySimplifiedOdometryRobot {
     private void configureOTOS() {
         myOtos.setLinearUnit(DistanceUnit.INCH);
         myOtos.setAngularUnit(AngleUnit.DEGREES);
-        myOtos.setOffset(new SparkFunOTOS.Pose2D(-5, 0, 0));
+        myOtos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0));
         myOtos.setLinearScalar(1.0);
         myOtos.setAngularScalar(1.0);
         myOtos.resetTracking();
@@ -137,7 +138,7 @@ public class NextTrySimplifiedOdometryRobot {
         //strafeEncoder = myOpMode.hardwareMap.get(DcMotor.class, "lateral");
 
         //Connect driveEncoder to the pos.y of myOtos encoder
-        double driveEncoder = myOtos.getPosition().y;
+        double driveEncoder = -myOtos.getPosition().y;
         //Connect strafeEncoder to the pos.x of myOtos encoder
         double strafeEncoder = myOtos.getPosition().x;
 
@@ -156,7 +157,7 @@ public class NextTrySimplifiedOdometryRobot {
 
         // zero out all the odometry readings and reset heading of the IMU.
         resetOdometry();
-        resetHeading();
+
 
         // Set the desired telemetry state
         this.showTelemetry = showTelemetry;
@@ -205,13 +206,15 @@ public class NextTrySimplifiedOdometryRobot {
         //get myOtos velocity for heading and turn rate
 
         otosTurn = myOtos.getVelocity().h;
+        otosHead = myOtos.getPosition().h;
 
         if (showTelemetry) {
             myOpMode.telemetry.addData("Odom Ax:Lat", "%5.2f %5.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
             myOpMode.telemetry.addData("Dist Ax:Lat", "%5.2f %5.2f", driveDistance, strafeDistance);
-            myOpMode.telemetry.addData("Head Deg:Rate", "%5.2f %5.2f", heading, turnRate);
+            myOpMode.telemetry.addData("RawHeading", "%5.2f", rawHeading);
             myOpMode.telemetry.addData("OTOS StrafeEnc: DrivEnc:", "%5.2f %5.2f", strafeEncoder, driveEncoder);
             myOpMode.telemetry.addData("OTOS TurnRate", "%5.2f", otosTurn);
+            myOpMode.telemetry.addData("imu turn rate", turnRate);
             myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
             packet.put("heading", heading);
             packet.put("driveDistance", driveDistance);
@@ -220,6 +223,7 @@ public class NextTrySimplifiedOdometryRobot {
             packet.put("rawStrafeOdometer", rawStrafeOdometer);
             packet.put("drivecontroller output", driveController.getOutput(driveDistance));
             packet.put("MyOtos Heading Velocity", otosTurn);
+            packet.put("MyOtos Head Position", otosHead);
             dashboard.sendTelemetryPacket(packet);
 
         }
@@ -383,6 +387,7 @@ public class NextTrySimplifiedOdometryRobot {
         strafeOdometerOffset = rawStrafeOdometer;
         strafeDistance = 0.0;
         strafeController.reset(0);
+        myOtos.resetTracking(); // TODO Testing to see if this is necessary
     }
 
     /**
