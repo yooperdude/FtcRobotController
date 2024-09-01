@@ -281,6 +281,8 @@ public class NextTrySimplifiedOdometryRobot {
      * @param holdTime Minimum time (sec) required to hold the final position.  0 = no hold.
      */
     public void turnTo(double headingDeg, double power, double holdTime) {
+        // @TODO This function does not use the odometry wheels, but does use the IMU gyro. Currently the turnto, at 180 degrees does not work properly.
+
 
         yawController.reset(headingDeg, power);
         while (myOpMode.opModeIsActive() && readSensors()) {
