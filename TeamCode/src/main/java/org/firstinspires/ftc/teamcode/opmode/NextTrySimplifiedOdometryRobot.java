@@ -6,6 +6,8 @@
 
 package org.firstinspires.ftc.teamcode.opmode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -72,6 +74,9 @@ public class NextTrySimplifiedOdometryRobot {
     private SparkFunOTOS driveEncoder;
     //private DcMotor strafeEncoder;      //  the Lateral (left/right) Odometry Module (may overlap with motor, or may not)
     private SparkFunOTOS strafeEncoder;
+
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    TelemetryPacket packet = new TelemetryPacket();
 
 
 
@@ -144,12 +149,13 @@ public class NextTrySimplifiedOdometryRobot {
 
         // Tell the software how the Control Hub is mounted on the robot to align the IMU XYZ axes correctly
         RevHubOrientationOnRobot orientationOnRobot =
-                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
-        // zero out all the odometry readings.
+        // zero out all the odometry readings and reset heading of the IMU.
         resetOdometry();
+        resetHeading();
 
         // Set the desired telemetry state
         this.showTelemetry = showTelemetry;
@@ -186,7 +192,7 @@ public class NextTrySimplifiedOdometryRobot {
 
         rawDriveOdometer = driveEncoder * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
         rawStrafeOdometer = strafeEncoder * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
-        driveDistance = (rawDriveOdometer - driveOdometerOffset); // * ODOM_INCHES_PER_COUNT;
+        driveDistance = (rawDriveOdometer - driveOdometerOffset); // * ODOM_INCHES_PER_COUNT
         strafeDistance = (rawStrafeOdometer - strafeOdometerOffset); // * ODOM_INCHES_PER_COUNT;
 
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
@@ -202,6 +208,13 @@ public class NextTrySimplifiedOdometryRobot {
             myOpMode.telemetry.addData("Head Deg:Rate", "%5.2f %5.2f", heading, turnRate);
             myOpMode.telemetry.addData("OTOS StrafeEnc: DrivEnc:", "%5.2f %5.2f", strafeEncoder, driveEncoder);
             myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
+            packet.put("heading", heading);
+            packet.put("driveDistance", driveDistance);
+            packet.put("strafeDistance", strafeDistance);
+            packet.put("rawDriveOdometer", rawDriveOdometer);
+            packet.put("rawStrafeOdometer", rawStrafeOdometer);
+            packet.put("drivecontroller output", driveController.getOutput(driveDistance));
+            dashboard.sendTelemetryPacket(packet);
 
         }
         return true;  // do this so this function can be included in the condition for a while loop to keep values fresh.
@@ -223,6 +236,7 @@ public class NextTrySimplifiedOdometryRobot {
         strafeController.reset(0);              // Maintain zero strafe drift
         yawController.reset();                          // Maintain last turn heading
         holdTimer.reset();
+        myOtos.resetTracking(); // TODO check if this is necessary
 
         while (myOpMode.opModeIsActive() && readSensors()){
 
