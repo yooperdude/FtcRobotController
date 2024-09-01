@@ -93,6 +93,7 @@ public class NextTrySimplifiedOdometryRobot {
     private double headingOffset    = 0; // Used to offset heading
 
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
+    private double otosTurn           = 0; // Latest Robot Turn Rate from OTOS
     private boolean showTelemetry     = true;
 
     // Robot Constructor
@@ -103,7 +104,7 @@ public class NextTrySimplifiedOdometryRobot {
     private void configureOTOS() {
         myOtos.setLinearUnit(DistanceUnit.INCH);
         myOtos.setAngularUnit(AngleUnit.DEGREES);
-        myOtos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0));
+        myOtos.setOffset(new SparkFunOTOS.Pose2D(-5, 0, 0));
         myOtos.setLinearScalar(1.0);
         myOtos.setAngularScalar(1.0);
         myOtos.resetTracking();
@@ -201,12 +202,16 @@ public class NextTrySimplifiedOdometryRobot {
         rawHeading  = orientation.getYaw(AngleUnit.DEGREES);
         heading     = rawHeading - headingOffset;
         turnRate    = angularVelocity.zRotationRate;
+        //get myOtos velocity for heading and turn rate
+
+        otosTurn = myOtos.getVelocity().h;
 
         if (showTelemetry) {
             myOpMode.telemetry.addData("Odom Ax:Lat", "%5.2f %5.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
             myOpMode.telemetry.addData("Dist Ax:Lat", "%5.2f %5.2f", driveDistance, strafeDistance);
             myOpMode.telemetry.addData("Head Deg:Rate", "%5.2f %5.2f", heading, turnRate);
             myOpMode.telemetry.addData("OTOS StrafeEnc: DrivEnc:", "%5.2f %5.2f", strafeEncoder, driveEncoder);
+            myOpMode.telemetry.addData("OTOS TurnRate", "%5.2f", otosTurn);
             myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
             packet.put("heading", heading);
             packet.put("driveDistance", driveDistance);
@@ -214,6 +219,7 @@ public class NextTrySimplifiedOdometryRobot {
             packet.put("rawDriveOdometer", rawDriveOdometer);
             packet.put("rawStrafeOdometer", rawStrafeOdometer);
             packet.put("drivecontroller output", driveController.getOutput(driveDistance));
+            packet.put("MyOtos Heading Velocity", otosTurn);
             dashboard.sendTelemetryPacket(packet);
 
         }
