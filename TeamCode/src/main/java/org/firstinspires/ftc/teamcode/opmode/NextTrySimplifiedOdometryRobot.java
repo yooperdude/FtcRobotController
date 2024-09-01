@@ -26,9 +26,12 @@ import java.util.List;
 
 public class NextTrySimplifiedOdometryRobot {
     // Adjust these numbers to suit your robot.
-    private final double ODOM_INCHES_PER_COUNT   = 0.002969;   //  GoBilda Odometry Pod (1/226.8)
+    //private final double ODOM_INCHES_PER_COUNT   = 0.002969;   //  GoBilda Odometry Pod (1/226.8)
     private final boolean INVERT_DRIVE_ODOMETRY  = false;       //  When driving FORWARD, the odometry value MUST increase.  If it does not, flip the value of this constant.
     private final boolean INVERT_STRAFE_ODOMETRY = true;       //  When strafing to the LEFT, the odometry value MUST increase.  If it does not, flip the value of this constant.
+    //Above values are found by checking the values from the OTOS. See the sensor Otos program in TeleOp.
+
+    // TODO Tune gains and accels for robot. Currnently moves in an odd rhomboid way.
 
     private static final double DRIVE_GAIN          = 0.03;    // Strength of axial position control
     private static final double DRIVE_ACCEL         = 2.0;     // Acceleration limit.  Percent Power change per second.  1.0 = 0-100% power in 1 sec.
@@ -71,15 +74,13 @@ public class NextTrySimplifiedOdometryRobot {
     private DcMotor rightBackDrive;     //  control the right back drive wheel
 
     //private DcMotor driveEncoder;       //  the Axial (front/back) Odometry Module (may overlap with motor, or may not)
-    private SparkFunOTOS driveEncoder;
+    private SparkFunOTOS driveEncoder;      // Otos driveEncoder
     //private DcMotor strafeEncoder;      //  the Lateral (left/right) Odometry Module (may overlap with motor, or may not)
-    private SparkFunOTOS strafeEncoder;
+    private SparkFunOTOS strafeEncoder;     // Otos strafeEncoder
 
+    // FTC Dashboard - Access at 192.168.43.1:8080/dash - See packets later on in the code
     FtcDashboard dashboard = FtcDashboard.getInstance();
     TelemetryPacket packet = new TelemetryPacket();
-
-
-
 
     private LinearOpMode myOpMode;
     private IMU imu;
@@ -95,7 +96,7 @@ public class NextTrySimplifiedOdometryRobot {
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
     private double otosTurn           = 0; // Latest Robot Turn Rate from OTOS
     private double otosHead           = 0; // Latest Robot Head from OTOS
-    private boolean showTelemetry     = true;
+    private boolean showTelemetry     = true; // set to true to display telemetry
 
     // Robot Constructor
     public NextTrySimplifiedOdometryRobot(LinearOpMode opmode) {
@@ -103,14 +104,14 @@ public class NextTrySimplifiedOdometryRobot {
     }
 
     private void configureOTOS() {
-        myOtos.setLinearUnit(DistanceUnit.INCH);
-        myOtos.setAngularUnit(AngleUnit.DEGREES);
-        myOtos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0));
-        myOtos.setLinearScalar(1.0);
-        myOtos.setAngularScalar(1.0);
-        myOtos.resetTracking();
-        myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0));
-        myOtos.calibrateImu(255, false);
+        myOtos.setLinearUnit(DistanceUnit.INCH); //Units are inches
+        myOtos.setAngularUnit(AngleUnit.DEGREES); //And in degrees
+        myOtos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0)); //This sets current position to 0,0,0
+        myOtos.setLinearScalar(1.0); //This sets the linear scalar to 1.0, can define this later once robot is built and determine the scaling.
+        myOtos.setAngularScalar(1.0); //This sets the angular scalar to 1.0, can define this later once robot is built and determine the scaling.
+        myOtos.resetTracking(); //This resets the tracking of the sensor
+        myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 90)); //This sets the position of the sensor to 0,0,90 as the sensor is currently turned 90 degrees
+        myOtos.calibrateImu(255, false); //Always calibrate the IMU
     }
 
     /**
@@ -125,11 +126,13 @@ public class NextTrySimplifiedOdometryRobot {
         // motor/device must match the names assigned during the robot configuration.
 
         // !!!  Set the drive direction to ensure positive power drives each wheel forward.
+        // !!! BadMonkey has a reversed motor. Hence the odd forward/reverse below
         leftFrontDrive  = setupDriveMotor("leftfront_drive", DcMotor.Direction.FORWARD);
         rightFrontDrive = setupDriveMotor("rightfront_drive", DcMotor.Direction.FORWARD);
         leftBackDrive  = setupDriveMotor( "leftback_drive", DcMotor.Direction.REVERSE);
         rightBackDrive = setupDriveMotor( "rightback_drive",DcMotor.Direction.FORWARD);
         imu = myOpMode.hardwareMap.get(IMU.class, "imu");
+        // Connect to the OTOS
         myOtos = myOpMode.hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
         configureOTOS();
 
@@ -150,6 +153,7 @@ public class NextTrySimplifiedOdometryRobot {
         }
 
         // Tell the software how the Control Hub is mounted on the robot to align the IMU XYZ axes correctly
+        // We currently still use the REV IMU and not the OTOS Imu. Will need more testing to decide how to proceed.
         RevHubOrientationOnRobot orientationOnRobot =
                 new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP);
@@ -189,6 +193,7 @@ public class NextTrySimplifiedOdometryRobot {
     public boolean readSensors() {
         double driveEncoder = myOtos.getPosition().y;
         double strafeEncoder = myOtos.getPosition().x;
+        double otosRawHeading = myOtos.getPosition().h;
 
 
 
@@ -208,6 +213,8 @@ public class NextTrySimplifiedOdometryRobot {
         otosTurn = myOtos.getVelocity().h;
         otosHead = myOtos.getPosition().h;
 
+        // Big Telemetry block to show all the values. myOpMode is for the Driver Station and packet.put is for the Dashboard.
+
         if (showTelemetry) {
             myOpMode.telemetry.addData("Odom Ax:Lat", "%5.2f %5.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
             myOpMode.telemetry.addData("Dist Ax:Lat", "%5.2f %5.2f", driveDistance, strafeDistance);
@@ -215,6 +222,7 @@ public class NextTrySimplifiedOdometryRobot {
             myOpMode.telemetry.addData("OTOS StrafeEnc: DrivEnc:", "%5.2f %5.2f", strafeEncoder, driveEncoder);
             myOpMode.telemetry.addData("OTOS TurnRate", "%5.2f", otosTurn);
             myOpMode.telemetry.addData("imu turn rate", turnRate);
+            myOpMode.telemetry.addData("heading", otosRawHeading);
             myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
             packet.put("heading", heading);
             packet.put("driveDistance", driveDistance);
@@ -223,7 +231,7 @@ public class NextTrySimplifiedOdometryRobot {
             packet.put("rawStrafeOdometer", rawStrafeOdometer);
             packet.put("drivecontroller output", driveController.getOutput(driveDistance));
             packet.put("MyOtos Heading Velocity", otosTurn);
-            packet.put("MyOtos Head Position", otosHead);
+            packet.put("MyOtos Head Position", otosRawHeading);
             dashboard.sendTelemetryPacket(packet);
 
         }
