@@ -110,7 +110,7 @@ public class NextTrySimplifiedOdometryRobot {
         myOtos.setLinearScalar(1.0); //This sets the linear scalar to 1.0, can define this later once robot is built and determine the scaling.
         myOtos.setAngularScalar(1.0); //This sets the angular scalar to 1.0, can define this later once robot is built and determine the scaling.
         myOtos.resetTracking(); //This resets the tracking of the sensor
-        myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 90)); //This sets the position of the sensor to 0,0,90 as the sensor is currently turned 90 degrees
+        myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0)); //This sets the position of the sensor to 0,0,90 as the sensor is currently turned 90 degrees
         myOtos.calibrateImu(255, false); //Always calibrate the IMU
     }
 
@@ -141,9 +141,9 @@ public class NextTrySimplifiedOdometryRobot {
         //strafeEncoder = myOpMode.hardwareMap.get(DcMotor.class, "lateral");
 
         //Connect driveEncoder to the pos.y of myOtos encoder
-        double driveEncoder = -myOtos.getPosition().y;
+        //double driveEncoder = myOtos.getPosition().y;
         //Connect strafeEncoder to the pos.x of myOtos encoder
-        double strafeEncoder = myOtos.getPosition().x;
+        //double strafeEncoder = myOtos.getPosition().x;
 
 
         // Set all hubs to use the AUTO Bulk Caching mode for faster encoder reads
