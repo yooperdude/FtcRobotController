@@ -6,6 +6,8 @@
 
 package org.firstinspires.ftc.teamcode.opmode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -19,16 +21,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-public class SimplifiedOdometryRobot {
+public class NextTrySimplifiedOdometryRobot {
     // Adjust these numbers to suit your robot.
-    private final double ODOM_INCHES_PER_COUNT   = 0.002969;   //  GoBilda Odometry Pod (1/226.8)
-    private final boolean INVERT_DRIVE_ODOMETRY  = true;       //  When driving FORWARD, the odometry value MUST increase.  If it does not, flip the value of this constant.
+    //private final double ODOM_INCHES_PER_COUNT   = 0.002969;   //  GoBilda Odometry Pod (1/226.8)
+    private final boolean INVERT_DRIVE_ODOMETRY  = false;       //  When driving FORWARD, the odometry value MUST increase.  If it does not, flip the value of this constant.
     private final boolean INVERT_STRAFE_ODOMETRY = true;       //  When strafing to the LEFT, the odometry value MUST increase.  If it does not, flip the value of this constant.
+    //Above values are found by checking the values from the OTOS. See the sensor Otos program in TeleOp.
+
+    // TODO Tune gains and accels for robot. Currnently moves in an odd rhomboid way.
 
     private static final double DRIVE_GAIN          = 0.03;    // Strength of axial position control
     private static final double DRIVE_ACCEL         = 2.0;     // Acceleration limit.  Percent Power change per second.  1.0 = 0-100% power in 1 sec.
@@ -54,9 +57,13 @@ public class SimplifiedOdometryRobot {
     public double heading           = 0; // Latest Robot heading from IMU
 
     // Establish a proportional controller for each axis to calculate the required power to achieve a setpoint.
-    public ProportionalControl driveController     = new ProportionalControl(DRIVE_GAIN, DRIVE_ACCEL, DRIVE_MAX_AUTO, DRIVE_TOLERANCE, DRIVE_DEADBAND, false);
-    public ProportionalControl strafeController    = new ProportionalControl(STRAFE_GAIN, STRAFE_ACCEL, STRAFE_MAX_AUTO, STRAFE_TOLERANCE, STRAFE_DEADBAND, false);
-    public ProportionalControl yawController       = new ProportionalControl(YAW_GAIN, YAW_ACCEL, YAW_MAX_AUTO, YAW_TOLERANCE,YAW_DEADBAND, true);
+    public ProportionalControl2 driveController     = new ProportionalControl2(DRIVE_GAIN, DRIVE_ACCEL, DRIVE_MAX_AUTO, DRIVE_TOLERANCE, DRIVE_DEADBAND, false);
+    public ProportionalControl2 strafeController    = new ProportionalControl2(STRAFE_GAIN, STRAFE_ACCEL, STRAFE_MAX_AUTO, STRAFE_TOLERANCE, STRAFE_DEADBAND, false);
+    public ProportionalControl2 yawController       = new ProportionalControl2(YAW_GAIN, YAW_ACCEL, YAW_MAX_AUTO, YAW_TOLERANCE,YAW_DEADBAND, true);
+
+    //SparkfunOtos is myOtos
+    SparkFunOTOS myOtos;
+    private final int READ_PERIOD = 1;
 
     // ---  Private Members
 
@@ -66,12 +73,14 @@ public class SimplifiedOdometryRobot {
     private DcMotor leftBackDrive;      //  control the left back drive wheel
     private DcMotor rightBackDrive;     //  control the right back drive wheel
 
-    private DcMotor driveEncoder;       //  the Axial (front/back) Odometry Module (may overlap with motor, or may not)
-    private DcMotor strafeEncoder;      //  the Lateral (left/right) Odometry Module (may overlap with motor, or may not)
+    //private DcMotor driveEncoder;       //  the Axial (front/back) Odometry Module (may overlap with motor, or may not)
+    private SparkFunOTOS driveEncoder;      // Otos driveEncoder
+    //private DcMotor strafeEncoder;      //  the Lateral (left/right) Odometry Module (may overlap with motor, or may not)
+    private SparkFunOTOS strafeEncoder;     // Otos strafeEncoder
 
-    //OTOS Initialization
-    SparkFunOTOS myOtos;
-    private final int READ_PERIOD = 1;
+    // FTC Dashboard - Access at 192.168.43.1:8080/dash - See packets later on in the code
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    TelemetryPacket packet = new TelemetryPacket();
 
     private LinearOpMode myOpMode;
     private IMU imu;
@@ -85,131 +94,56 @@ public class SimplifiedOdometryRobot {
     private double headingOffset    = 0; // Used to offset heading
 
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
-    private boolean showTelemetry     = true;
+    private double otosTurn           = 0; // Latest Robot Turn Rate from OTOS
+    private double otosHead           = 0; // Latest Robot Head from OTOS
+    private boolean showTelemetry     = true; // set to true to display telemetry
 
     // Robot Constructor
-    public SimplifiedOdometryRobot(LinearOpMode opmode) {
+    public NextTrySimplifiedOdometryRobot(LinearOpMode opmode) {
         myOpMode = opmode;
+    }
+
+    private void configureOTOS() {
+        myOtos.setLinearUnit(DistanceUnit.INCH); //Units are inches
+        myOtos.setAngularUnit(AngleUnit.DEGREES); //And in degrees
+        myOtos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0)); //This sets current position to 0,0,0
+        myOtos.setLinearScalar(1.0); //This sets the linear scalar to 1.0, can define this later once robot is built and determine the scaling.
+        myOtos.setAngularScalar(1.0); //This sets the angular scalar to 1.0, can define this later once robot is built and determine the scaling.
+        myOtos.resetTracking(); //This resets the tracking of the sensor
+        myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 90)); //This sets the position of the sensor to 0,0,90 as the sensor is currently turned 90 degrees
+        myOtos.calibrateImu(255, false); //Always calibrate the IMU
     }
 
     /**
      * Robot Initialization:
      *  Use the hardware map to Connect to devices.
      *  Perform any set-up all the hardware devices.
-     * param showTelemetry  Set to true if you want telemetry to be displayed by the robot sensor/drive functions.
+     * @param showTelemetry  Set to true if you want telemetry to be displayed by the robot sensor/drive functions.
      */
-
-    private void configureOtos() {
-        //telemetry.addLine("Configuring OTOS...");
-        //telemetry.update();
-
-        // Set the desired units for linear and angular measurements. Can be either
-        // meters or inches for linear, and radians or degrees for angular. If not
-        // set, the default is inches and degrees. Note that this setting is not
-        // persisted in the sensor, so you need to set at the start of all your
-        // OpModes if using the non-default value.
-        // myOtos.setLinearUnit(DistanceUnit.METER);
-        myOtos.setLinearUnit(DistanceUnit.INCH);
-        // myOtos.setAngularUnit(AnguleUnit.RADIANS);
-        myOtos.setAngularUnit(AngleUnit.DEGREES);
-
-        // Assuming you've mounted your sensor to a robot and it's not centered,
-        // you can specify the offset for the sensor relative to the center of the
-        // robot. The units default to inches and degrees, but if you want to use
-        // different units, specify them before setting the offset! Note that as of
-        // firmware version 1.0, these values will be lost after a power cycle, so
-        // you will need to set them each time you power up the sensor. For example, if
-        // the sensor is mounted 5 inches to the left (negative X) and 10 inches
-        // forward (positive Y) of the center of the robot, and mounted 90 degrees
-        // clockwise (negative rotation) from the robot's orientation, the offset
-        // would be {-5, 10, -90}. These can be any value, even the angle can be
-        // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
-        myOtos.setOffset(offset);
-
-        // Here we can set the linear and angular scalars, which can compensate for
-        // scaling issues with the sensor measurements. Note that as of firmware
-        // version 1.0, these values will be lost after a power cycle, so you will
-        // need to set them each time you power up the sensor. They can be any value
-        // from 0.872 to 1.127 in increments of 0.001 (0.1%). It is recommended to
-        // first set both scalars to 1.0, then calibrate the angular scalar, then
-        // the linear scalar. To calibrate the angular scalar, spin the robot by
-        // multiple rotations (eg. 10) to get a precise error, then set the scalar
-        // to the inverse of the error. Remember that the angle wraps from -180 to
-        // 180 degrees, so for example, if after 10 rotations counterclockwise
-        // (positive rotation), the sensor reports -15 degrees, the required scalar
-        // would be 3600/3585 = 1.004. To calibrate the linear scalar, move the
-        // robot a known distance and measure the error; do this multiple times at
-        // multiple speeds to get an average, then set the linear scalar to the
-        // inverse of the error. For example, if you move the robot 100 inches and
-        // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        myOtos.setLinearScalar(1.0);
-        myOtos.setAngularScalar(1.0);
-
-        // The IMU on the OTOS includes a gyroscope and accelerometer, which could
-        // have an offset. Note that as of firmware version 1.0, the calibration
-        // will be lost after a power cycle; the OTOS performs a quick calibration
-        // when it powers up, but it is recommended to perform a more thorough
-        // calibration at the start of all your OpModes. Note that the sensor must
-        // be completely stationary and flat during calibration! When calling
-        // calibrateImu(), you can specify the number of samples to take and whether
-        // to wait until the calibration is complete. If no parameters are provided,
-        // it will take 255 samples and wait until done; each sample takes about
-        // 2.4ms, so about 612ms total
-        myOtos.calibrateImu();
-
-        // Reset the tracking algorithm - this resets the position to the origin,
-        // but can also be used to recover from some rare tracking errors
-        myOtos.resetTracking();
-
-        // After resetting the tracking, the OTOS will report that the robot is at
-        // the origin. If your robot does not start at the origin, or you have
-        // another source of location information (eg. vision odometry), you can set
-        // the OTOS location to match and it will continue to track from there.
-        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-        myOtos.setPosition(currentPosition);
-
-        // Get the hardware and firmware version
-        SparkFunOTOS.Version hwVersion = new SparkFunOTOS.Version();
-        SparkFunOTOS.Version fwVersion = new SparkFunOTOS.Version();
-        myOtos.getVersionInfo(hwVersion, fwVersion);
-
-       /* telemetry.addLine("OTOS configured! Press start to get position data!");
-        telemetry.addLine();
-        telemetry.addLine(String.format("OTOS Hardware Version: v%d.%d", hwVersion.major, hwVersion.minor));
-        telemetry.addLine(String.format("OTOS Firmware Version: v%d.%d", fwVersion.major, fwVersion.minor));
-        telemetry.update();
-        */
-
-        myOpMode.telemetry.addData("Status","OTOS configured! Press start to get position data!");
-    }
     public void initialize(boolean showTelemetry)
     {
         // Initialize the hardware variables. Note that the strings used to 'get' each
         // motor/device must match the names assigned during the robot configuration.
 
         // !!!  Set the drive direction to ensure positive power drives each wheel forward.
-        leftFrontDrive  = setupDriveMotor("leftfront_drive", DcMotor.Direction.REVERSE);
+        // !!! BadMonkey has a reversed motor. Hence the odd forward/reverse below
+        leftFrontDrive  = setupDriveMotor("leftfront_drive", DcMotor.Direction.FORWARD);
         rightFrontDrive = setupDriveMotor("rightfront_drive", DcMotor.Direction.FORWARD);
         leftBackDrive  = setupDriveMotor( "leftback_drive", DcMotor.Direction.REVERSE);
         rightBackDrive = setupDriveMotor( "rightback_drive",DcMotor.Direction.FORWARD);
         imu = myOpMode.hardwareMap.get(IMU.class, "imu");
+        // Connect to the OTOS
+        myOtos = myOpMode.hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+        configureOTOS();
 
-        //  Removed and should need as the OTOS should handle it.
+        //  Connect to the encoder channels using the name of that channel.
         //driveEncoder = myOpMode.hardwareMap.get(DcMotor.class, "axial");
         //strafeEncoder = myOpMode.hardwareMap.get(DcMotor.class, "lateral");
 
-
-        //Need to reference our sensor. TODO Fix this and verify on other workstation.
-
-        Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.SECONDS);
-        rateLimit.expire();
-
-        myOtos = myOpMode.hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
-
-        configureOtos();
-
-        myOtos.calibrateImu();
+        //Connect driveEncoder to the pos.y of myOtos encoder
+        double driveEncoder = -myOtos.getPosition().y;
+        //Connect strafeEncoder to the pos.x of myOtos encoder
+        double strafeEncoder = myOtos.getPosition().x;
 
 
         // Set all hubs to use the AUTO Bulk Caching mode for faster encoder reads
@@ -217,19 +151,24 @@ public class SimplifiedOdometryRobot {
         for (LynxModule module : allHubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
-        // TODO Need to verify IMU orientation on robot
+
         // Tell the software how the Control Hub is mounted on the robot to align the IMU XYZ axes correctly
+        // We currently still use the REV IMU and not the OTOS Imu. Will need more testing to decide how to proceed.
         RevHubOrientationOnRobot orientationOnRobot =
-                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
-        // zero out all the odometry readings.
+        // zero out all the odometry readings and reset heading of the IMU.
         resetOdometry();
+
 
         // Set the desired telemetry state
         this.showTelemetry = showTelemetry;
     }
+
+
+
 
     /**
      *   Setup a drive motor with passed parameters.  Ensure encoder is reset.
@@ -252,22 +191,16 @@ public class SimplifiedOdometryRobot {
      * @return true
      */
     public boolean readSensors() {
-        SparkFunOTOS.Pose2D pos = myOtos.getPosition();
-        //Removed reference to rawDrive and rawStrafe as they come from the encoders
-        rawDriveOdometer = pos.x * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
-        rawStrafeOdometer = pos.y * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
+        double driveEncoder = myOtos.getPosition().y;
+        double strafeEncoder = myOtos.getPosition().x;
+        double otosRawHeading = myOtos.getPosition().h;
 
 
 
-
-
-
-      //  double rawDriveOdometer = pos.x;
-      //  double rawStrafeOdometer = pos.y;
-
-
-        double driveDistance = (rawDriveOdometer - driveOdometerOffset);
-        double strafeDistance = (rawStrafeOdometer - strafeOdometerOffset);
+        rawDriveOdometer = driveEncoder * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
+        rawStrafeOdometer = strafeEncoder * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
+        driveDistance = (rawDriveOdometer - driveOdometerOffset); // * ODOM_INCHES_PER_COUNT
+        strafeDistance = (rawStrafeOdometer - strafeOdometerOffset); // * ODOM_INCHES_PER_COUNT;
 
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
@@ -275,13 +208,35 @@ public class SimplifiedOdometryRobot {
         rawHeading  = orientation.getYaw(AngleUnit.DEGREES);
         heading     = rawHeading - headingOffset;
         turnRate    = angularVelocity.zRotationRate;
+        //get myOtos velocity for heading and turn rate
+
+        otosTurn = myOtos.getVelocity().h;
+        otosHead = myOtos.getPosition().h;
+
+        // Big Telemetry block to show all the values. myOpMode is for the Driver Station and packet.put is for the Dashboard.
 
         if (showTelemetry) {
-            myOpMode.telemetry.addData("Odom Ax:Lat", "%6.2f %6.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
+            myOpMode.telemetry.addData("Odom Ax:Lat", "%5.2f %5.2f", rawDriveOdometer - driveOdometerOffset, rawStrafeOdometer - strafeOdometerOffset);
             myOpMode.telemetry.addData("Dist Ax:Lat", "%5.2f %5.2f", driveDistance, strafeDistance);
-            myOpMode.telemetry.addData("Head Deg:Rate", "%5.2f %5.2f", heading, turnRate);
+            myOpMode.telemetry.addData("RawHeading", "%5.2f", rawHeading);
+            myOpMode.telemetry.addData("OTOS StrafeEnc: DrivEnc:", "%5.2f %5.2f", strafeEncoder, driveEncoder);
+            myOpMode.telemetry.addData("OTOS TurnRate", "%5.2f", otosTurn);
+            myOpMode.telemetry.addData("imu turn rate", turnRate);
+            myOpMode.telemetry.addData("heading", otosRawHeading);
+            myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
+            packet.put("heading", heading);
+            packet.put("driveDistance", driveDistance);
+            packet.put("strafeDistance", strafeDistance);
+            packet.put("rawDriveOdometer", rawDriveOdometer);
+            packet.put("rawStrafeOdometer", rawStrafeOdometer);
+            packet.put("drivecontroller output", driveController.getOutput(driveDistance));
+            packet.put("MyOtos Heading Velocity", otosTurn);
+            packet.put("MyOtos Head Position", otosRawHeading);
+            dashboard.sendTelemetryPacket(packet);
+
         }
         return true;  // do this so this function can be included in the condition for a while loop to keep values fresh.
+
     }
 
     //  ########################  Mid level control functions.  #############################3#
@@ -299,6 +254,7 @@ public class SimplifiedOdometryRobot {
         strafeController.reset(0);              // Maintain zero strafe drift
         yawController.reset();                          // Maintain last turn heading
         holdTimer.reset();
+        myOtos.resetTracking(); // TODO check if this is necessary
 
         while (myOpMode.opModeIsActive() && readSensors()){
 
@@ -357,6 +313,8 @@ public class SimplifiedOdometryRobot {
      * @param holdTime Minimum time (sec) required to hold the final position.  0 = no hold.
      */
     public void turnTo(double headingDeg, double power, double holdTime) {
+        // @TODO This function does not use the odometry wheels, but does use the IMU gyro. Currently the turnto, at 180 degrees does not work properly.
+
 
         yawController.reset(headingDeg, power);
         while (myOpMode.opModeIsActive() && readSensors()) {
@@ -411,12 +369,11 @@ public class SimplifiedOdometryRobot {
         leftBackDrive.setPower(lB);
         rightBackDrive.setPower(rB);
 
-        if (showTelemetry) {
-            //myOpMode.telemetry.addData("Axes D:S:Y", "%5.2f %5.2f %5.2f", drive, strafe, yaw);
-            //myOpMode.telemetry.addData("Wheels lf:rf:lb:rb", "%5.2f %5.2f %5.2f %5.2f", lF, rF, lB, rB);
-
-            //myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
-        }
+        /*if (showTelemetry) {
+            myOpMode.telemetry.addData("Axes D:S:Y", "%5.2f %5.2f %5.2f", drive, strafe, yaw);
+            myOpMode.telemetry.addData("Wheels lf:rf:lb:rb", "%5.2f %5.2f %5.2f %5.2f", lF, rF, lB, rB);
+            myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
+        }*/
     }
 
     /**
@@ -428,18 +385,17 @@ public class SimplifiedOdometryRobot {
 
     /**
      * Set odometry counts and distances to zero.
-     * TODO Need to check that the reset works as intended with the OTOS sensor.
      */
     public void resetOdometry() {
         readSensors();
         driveOdometerOffset = rawDriveOdometer;
         driveDistance = 0.0;
         driveController.reset(0);
-        myOtos.resetTracking();
 
         strafeOdometerOffset = rawStrafeOdometer;
         strafeDistance = 0.0;
         strafeController.reset(0);
+        myOtos.resetTracking(); // TODO Testing to see if this is necessary
     }
 
     /**
@@ -471,7 +427,7 @@ public class SimplifiedOdometryRobot {
  * to get an axis to the desired setpoint value.
  * It also implements an acceleration limit, and a max power output.
  */
-class ProportionalControl {
+class ProportionalControl2 {
     double  lastOutput;
     double  gain;
     double  accelLimit;
@@ -484,7 +440,7 @@ class ProportionalControl {
     boolean inPosition;
     ElapsedTime cycleTime = new ElapsedTime();
 
-    public ProportionalControl(double gain, double accelLimit, double outputLimit, double tolerance, double deadband, boolean circular) {
+    public ProportionalControl2(double gain, double accelLimit, double outputLimit, double tolerance, double deadband, boolean circular) {
         this.gain = gain;
         this.accelLimit = accelLimit;
         this.defaultOutputLimit = outputLimit;
@@ -570,6 +526,4 @@ class ProportionalControl {
         inPosition = false;
         lastOutput = 0.0;
     }
-
-
 }

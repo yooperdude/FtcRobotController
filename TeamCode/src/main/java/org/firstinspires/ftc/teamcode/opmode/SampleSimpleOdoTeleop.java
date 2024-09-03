@@ -30,7 +30,7 @@ public class SampleSimpleOdoTeleop extends LinearOpMode
     boolean autoHeading    = false; // used to indicate when heading should be locked.
 
     // get an instance of the "Robot" class.
-    SimplifiedOdometryRobot robot = new SimplifiedOdometryRobot(this);
+    NextTrySimplifiedOdometryRobot robot = new NextTrySimplifiedOdometryRobot(this);
 
     @Override public void runOpMode()
     {

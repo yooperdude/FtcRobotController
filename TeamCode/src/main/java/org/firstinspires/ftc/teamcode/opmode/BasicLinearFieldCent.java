@@ -28,57 +28,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+    * This file contains the MoBots / MoreBots Field Centric Linear "OpMode". This is the base
+    * template for both robots. Built in functionality includes: field centric motion, IMU, and
+    * the bones for a full TeleOp.
+    *
+    * Field Centric is a method of driving a robot where the robot moves in the direction of the
+    * joystick regardless of the robot's orientation. This is done by rotating the joystick input
+    * by the robot's heading.
+    *
+    * This is READ ONLY. If you want to make your own, copy this class and paste it with a new name.
+    *
+    *
+ */
+
 package org.firstinspires.ftc.teamcode.opmode;
 
-        import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-        import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-        import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-        import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-        import com.qualcomm.robotcore.hardware.DcMotor;
-        import com.qualcomm.robotcore.hardware.DcMotorSimple;
-        import com.qualcomm.robotcore.hardware.IMU;
-        import com.qualcomm.robotcore.util.ElapsedTime;
-        import com.qualcomm.robotcore.hardware.Servo;
-        import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-        import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-        import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-        import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-        import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-        import com.acmerobotics.dashboard.FtcDashboard;
-        import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-        import java.util.Locale;
-        import org.firstinspires.ftc.robotcore.external.Func;
-
-
-/*
- * This file contains an example of a Linear "OpMode".
- * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
- * The names of OpModes appear on the menu of the FTC Driver Station.
- * When a selection is made from the menu, the corresponding OpMode is executed.
- *
- * This particular OpMode illustrates driving a 4-motor Omni-Directional (or Holonomic) robot.
- * This code will work with either a Mecanum-Drive or an X-Drive train.
- * Both of these drives are illustrated at https://gm0.org/en/latest/docs/robot-design/drivetrains/holonomic.html
- * Note that a Mecanum drive must display an X roller-pattern when viewed from above.
- *
- * Also note that it is critical to set the correct rotation direction for each motor.  See details below.
- *
- * Holonomic drives provide the ability for the robot to move in three axes (directions) simultaneously.
- * Each motion axis is controlled by one Joystick axis.
- *
- * 1) Axial:    Driving forward and backward               Left-joystick Forward/Backward
- * 2) Lateral:  Strafing right and left                     Left-joystick Right and Left
- * 3) Yaw:      Rotating Clockwise and counter clockwise    Right-joystick Right and Left
- *
- * This code is written assuming that the right-side motors need to be reversed for the robot to drive forward.
- * When you first test your robot, if it moves backward when you push the left stick forward, then you must flip
- * the direction of all 4 motors (see code below).
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp(name="MOBots Core Basic Field Centered Template", group="Linear OpMode")
 //@Disabled
@@ -99,12 +76,19 @@ public class BasicLinearFieldCent extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        // Initialize the hardware variables. Note that the strings used here must correspond
-        // to the names assigned during the robot configuration step on the DS or RC devices.
+        /* Initialize the hardware variables. Note that the strings used here must correspond
+         * to the names assigned during the robot configuration step on the DS or RC devices.
+         * These names are critical, label the front of the robot as FRONT. This will be
+         * important later!
+         */
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "motorFrontLeft");
         leftBackDrive  = hardwareMap.get(DcMotor.class, "motorBackLeft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "motorFrontRight");
         rightBackDrive = hardwareMap.get(DcMotor.class, "motorBackRight");
+
+        /*
+        * This initializes the servoTest servo. You would initialize other servos using the same method.
+         */
 
         servoTest = hardwareMap.get(Servo.class, "servoTest");
         //Start the composeTelemtry function.
@@ -129,12 +113,8 @@ public class BasicLinearFieldCent extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        // Wait for the game to start (driver presses PLAY)
+        // Wait for the game to start (driver presses PLAY) This will display on the Driver Station.
         telemetry.addData("Status", "Initialized");
-        //Add Telemetry for motor speeds
-        telemetry.addData("Front left/Right", "%4.2f, %4.2f", 0.0, 0.0);
-        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", 0.0, 0.0);
-        //Read encoder velocity for front motors
 
         //Retrieve the IMU from the hardware map.
         imu = hardwareMap.get(IMU.class, "imu");
@@ -144,8 +124,6 @@ public class BasicLinearFieldCent extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         //Without this the REV hub orientation is assumed to be Logo Up and USB Forward.
         imu.initialize(parameters);
-
-
 
         telemetry.update();
 
@@ -161,16 +139,15 @@ public class BasicLinearFieldCent extends LinearOpMode {
             double max;
 
             telemetry.update();
+            // This section uses packet.put to send telenmetry data to the dashboard
             packet.put("heading", botHeading);
             packet.put("frontLeftMotor Power", leftFrontDrive.getPower());
             packet.put("frontRightMotor Power", rightFrontDrive.getPower());
             //Add a packet for the current robot battery voltage
             packet.put("Battery Voltage", hardwareMap.voltageSensor.iterator().next().getVoltage());
 
-
+            // You need this to actually send the telemetry data to the dashboard
             dashboard.sendTelemetryPacket(packet);
-
-
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial   = -gamepad1.left_stick_y;  // Y Note: pushing stick forward gives negative value
@@ -219,10 +196,6 @@ public class BasicLinearFieldCent extends LinearOpMode {
                 servoTest.setPosition(0.0);
             }
 
-
-
-
-
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
@@ -238,35 +211,6 @@ public class BasicLinearFieldCent extends LinearOpMode {
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackDrive.getPower(), rightBackDrive.getPower());
             telemetry.update();
         }
-    }
-    //Set up telemetry dashboard compose function
-    void composeTelemetry() {
-
-        // At the beginning of each telemetry update, grab a bunch of data
-        // from the IMU that we will then display in separate lines.
-        telemetry.addAction(new Runnable() { @Override public void run()
-        {
-            // Acquiring the angles is relatively expensive; we don't want
-            // to do that in each of the three items that need that info, as that's
-            // three times the necessary expense.
-
-        }
-        });
-
-        //Add telemetry line for botheading
-
-
-        telemetry.addLine()
-                .addData("Bot Heading", new Func<String>() {
-                    @Override public String value() {
-                        double yawValue = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-                        String yawString = Double.toString(yawValue);
-                        return yawString;
-                        //return botHeading;
-                    }
-                });
-
-
     }
     }
 

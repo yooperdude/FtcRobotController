@@ -4,12 +4,10 @@
     See the readme for a link to a video tutorial explaining the operation and limitations of the code.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import org.firstinspires.ftc.teamcode.opmode.SimplifiedOdometryRobot;
 
 /*
  * This OpMode illustrates an autonomous opmode using simple Odometry
@@ -18,48 +16,52 @@ import org.firstinspires.ftc.teamcode.opmode.SimplifiedOdometryRobot;
  * The IMU gyro is used to stabilize the heading during all motions
  */
 
-@Autonomous(name="Sample Autonomous for OTOS Sensor", group = "Mr. Phil")
+@Autonomous(name="Next Try Sample Autonomous for OTOS Sensor", group = "Mr. Phil")
 public class SampleAutonomous extends LinearOpMode
 {
     // get an instance of the "Robot" class.
-    private SimplifiedOdometryRobot robot = new SimplifiedOdometryRobot(this);
+    private NextTrySimplifiedOdometryRobot robot = new NextTrySimplifiedOdometryRobot(this);
 
     @Override public void runOpMode()
     {
         // Initialize the robot hardware & Turn on telemetry
         robot.initialize(true);
 
-        // Wait for driver to press start
-        //telemetry.addData(">", "Touch Play to run Auto");
-       // telemetry.update();
-
         waitForStart();
-        robot.resetHeading();  // Reset heading to set a baseline for Auto
 
         // Run Auto if stop was not pressed.
         if (opModeIsActive())
         {
             // Note, this example takes more than 30 seconds to execute, so turn OFF the auto timer.
 
-            // Drive a large rectangle, turning at each corner
-            robot.drive(  1, 0.60, 0.25);
-            robot.turnTo(90, 0.45, 0.5);
-            robot.drive(  1, 0.60, 0.25);
-            robot.turnTo(180, 0.45, 0.5);
-            robot.drive(  1, 0.60, 0.25);
-            robot.turnTo(270, 0.45, 0.5);
-            robot.drive(  1, 0.60, 0.25);
-            robot.turnTo(0, 0.45, 0.5);
 
+            // Drive a large rectangle, turning at each corner
+/*
+            robot.drive(  5.0, 0.60, 0.25);
+            robot.strafe(  5.0, 0.60, 0.25);
+            robot.drive(  -5.0, 0.60, 0.25);
+            robot.strafe(  -5.0, 0.60, 0.25);
+*/
+
+            robot.turnTo(0, 0.45, 0.25);
+            robot.drive(  1.0, 0.10, 0.25);
+            robot.turnTo(90, 0.45, 0.25);
+            robot.drive(  1.0, 0.10, 0.25);
+            robot.turnTo(180, 0.45, 0.25);
+            robot.drive(  1.0, 0.10, 0.25);
+            robot.turnTo(270, 0.45, 0.25);
+            robot.drive(  1.0, 0.10, 0.25);
+            robot.turnTo(0, 0.45, 0.25);
+            robot.strafe(  1.0, 0.10, 0.25);
 
 
             sleep(500);
 
             // Drive the path again without turning.
             //robot.drive(  1, 0.60, 0.15);
-            //robot.strafe( 1, 0.60, 0.15);
+            //robot.strafe( -1, 0.60, 0.15);
             //robot.drive( -1, 0.60, 0.15);
-            //robot.strafe(-1, 0.60, 0.15);
+            //robot.strafe(1, 0.60, 0.15);
         }
     }
 }
