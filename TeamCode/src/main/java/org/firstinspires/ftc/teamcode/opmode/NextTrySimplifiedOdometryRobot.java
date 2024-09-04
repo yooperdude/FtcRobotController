@@ -417,6 +417,7 @@ public class NextTrySimplifiedOdometryRobot {
         heading = 0;
     }
 
+    //Neither of these are used it AUTON.
     public double getHeading() {return heading;}
     public double getTurnRate() {return turnRate;}
 
