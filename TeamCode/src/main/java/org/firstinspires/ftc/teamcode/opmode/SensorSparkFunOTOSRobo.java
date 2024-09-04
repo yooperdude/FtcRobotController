@@ -43,7 +43,7 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
+        //huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
         Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.SECONDS);
         rateLimit.expire();
 
@@ -56,13 +56,15 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
         myOtos.calibrateImu();
         //Initialize the dashboard
 
-        if (!huskyLens.knock()) {
+       /* if (!huskyLens.knock()) {
             telemetry.addData(">>", "Problem communicating with " + huskyLens.getDeviceName());
         } else {
             telemetry.addData(">>", "Press start to continue");
         }
 
         huskyLens.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION);
+        */
+
         telemetry.update();
 
         // Wait for the start button to be pressed
@@ -91,24 +93,25 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
             }
             rateLimit.reset();
 
-            HuskyLens.Block[] blocks = huskyLens.blocks();
+          /*  HuskyLens.Block[] blocks = huskyLens.blocks();
             telemetry.addData("Block count", blocks.length);
             for (int i = 0; i < blocks.length; i++) {
                 telemetry.addData("Block", blocks[i].toString());
                 packet.put("Block", blocks[i].toString());
             }
+            */
 
             //Add telemetry data for the OTOS X, Y, and Heading
-            packet.put("X coordinate", pos.x);
-            packet.put("Y coordinate", pos.y);
-            packet.put("Heading angle", pos.h);
+            packet.put("Dash X coordinate", pos.x);
+            packet.put("Dash Y coordinate", pos.y);
+            packet.put("Dash Heading angle", pos.h);
 
             //Send the telemetry packet to the dashboard
             dashboard.sendTelemetryPacket(packet);
 
-            telemetry.addData("X coordinate Top", pos.x);
-            telemetry.addData("Y coordinate", pos.y);
-            telemetry.addData("Heading angle", pos.h);
+            telemetry.addData("DS X coordinate Top", pos.x);
+            telemetry.addData("DS Y coordinate", pos.y);
+            telemetry.addData("DS Heading angle", pos.h);
 
 
 
@@ -118,10 +121,7 @@ public class SensorSparkFunOTOSRobo extends LinearOpMode {
             telemetry.addLine("Version check.");
             telemetry.addLine();
 
-            // Log the position to the telemetry
-            telemetry.addData("X coordinate bottom", pos.x);
-            telemetry.addData("Y coordinate", pos.y);
-            telemetry.addData("Heading angle", pos.h);
+
 
             // Update the telemetry on the driver station
             telemetry.update();

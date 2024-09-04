@@ -11,8 +11,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.opmode.SimplifiedOdometryRobot;
-
 /*
  * This OpMode illustrates a teleop OpMode for an Omni robot.
  * An external "Robot" class is used to manage all motor/sensor interfaces, and to assist driving functions.
@@ -32,7 +30,7 @@ public class SampleSimpleOdoTeleop extends LinearOpMode
     boolean autoHeading    = false; // used to indicate when heading should be locked.
 
     // get an instance of the "Robot" class.
-    SimplifiedOdometryRobot robot = new SimplifiedOdometryRobot(this);
+    NextTrySimplifiedOdometryRobot robot = new NextTrySimplifiedOdometryRobot(this);
 
     @Override public void runOpMode()
     {
