@@ -254,7 +254,7 @@ public class NextTrySimplifiedOdometryRobot {
         strafeController.reset(0);              // Maintain zero strafe drift
         yawController.reset();                          // Maintain last turn heading
         holdTimer.reset();
-        myOtos.resetTracking(); // TODO check if this is necessary
+        //myOtos.resetTracking(); // TODO check if this is necessary
 
         while (myOpMode.opModeIsActive() && readSensors()){
 
@@ -388,6 +388,7 @@ public class NextTrySimplifiedOdometryRobot {
      */
     public void resetOdometry() {
         readSensors();
+        myOtos.resetTracking(); // TODO Moved from the end. 9/3/2024
         driveOdometerOffset = rawDriveOdometer;
         driveDistance = 0.0;
         driveController.reset(0);
@@ -395,7 +396,7 @@ public class NextTrySimplifiedOdometryRobot {
         strafeOdometerOffset = rawStrafeOdometer;
         strafeDistance = 0.0;
         strafeController.reset(0);
-        myOtos.resetTracking(); // TODO Testing to see if this is necessary
+
     }
 
     /**
