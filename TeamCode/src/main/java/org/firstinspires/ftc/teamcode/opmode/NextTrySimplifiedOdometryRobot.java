@@ -28,7 +28,7 @@ public class NextTrySimplifiedOdometryRobot {
     // Adjust these numbers to suit your robot.
     //private final double ODOM_INCHES_PER_COUNT   = 0.002969;   //  GoBilda Odometry Pod (1/226.8)
     private final boolean INVERT_DRIVE_ODOMETRY  = false;       //  When driving FORWARD, the odometry value MUST increase.  If it does not, flip the value of this constant.
-    private final boolean INVERT_STRAFE_ODOMETRY = true;       //  When strafing to the LEFT, the odometry value MUST increase.  If it does not, flip the value of this constant.
+    private final boolean INVERT_STRAFE_ODOMETRY = false;       //  When strafing to the LEFT, the odometry value MUST increase.  If it does not, flip the value of this constant.
     //Above values are found by checking the values from the OTOS. See the sensor Otos program in TeleOp.
 
     // TODO Tune gains and accels for robot. Currnently moves in an odd rhomboid way.
@@ -155,7 +155,7 @@ public class NextTrySimplifiedOdometryRobot {
         // Tell the software how the Control Hub is mounted on the robot to align the IMU XYZ axes correctly
         // We currently still use the REV IMU and not the OTOS Imu. Will need more testing to decide how to proceed.
         RevHubOrientationOnRobot orientationOnRobot =
-                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
@@ -191,8 +191,9 @@ public class NextTrySimplifiedOdometryRobot {
      * @return true
      */
     public boolean readSensors() {
-        double driveEncoder = myOtos.getPosition().y;
-        double strafeEncoder = myOtos.getPosition().x;
+        double driveEncoder = myOtos.getPosition().x;
+        double driveEncoderabs = myOtos.getLinearScalar();
+        double strafeEncoder = myOtos.getPosition().y;
         double otosRawHeading = myOtos.getPosition().h;
 
 
@@ -214,6 +215,7 @@ public class NextTrySimplifiedOdometryRobot {
 
         rawHeading  = orientation.getYaw(AngleUnit.DEGREES);
         heading     = rawHeading - headingOffset;
+        //heading     = otosRawHeading - headingOffset;
         turnRate    = angularVelocity.zRotationRate;
 
         //get myOtos velocity for heading and turn rate
@@ -232,7 +234,7 @@ public class NextTrySimplifiedOdometryRobot {
             myOpMode.telemetry.addData("imu turn rate", turnRate);
             myOpMode.telemetry.addData("heading", otosRawHeading);
             myOpMode.telemetry.update(); //  Assume this is the last thing done in the loop.
-            packet.put("heading", heading);
+            packet.put("Otos Raw heading", otosRawHeading);
             packet.put("driveDistance", driveDistance);
             packet.put("strafeDistance", strafeDistance);
             packet.put("rawDriveOdometer", rawDriveOdometer);
@@ -279,6 +281,7 @@ public class NextTrySimplifiedOdometryRobot {
             }
             myOpMode.sleep(10);
         }
+        myOtos.resetTracking();
         stopRobot();
     }
 
@@ -321,7 +324,7 @@ public class NextTrySimplifiedOdometryRobot {
      * @param holdTime Minimum time (sec) required to hold the final position.  0 = no hold.
      */
     public void turnTo(double headingDeg, double power, double holdTime) {
-        // @TODO This function does not use the odometry wheels, but does use the IMU gyro. Currently the turnto, at 180 degrees does not work properly.
+        // @TODO This function does not use the odometry wheels
 
 
         yawController.reset(headingDeg, power);
@@ -341,6 +344,7 @@ public class NextTrySimplifiedOdometryRobot {
             myOpMode.sleep(10);
         }
         stopRobot();
+        myOtos.resetTracking();
     }
 
 
@@ -396,7 +400,8 @@ public class NextTrySimplifiedOdometryRobot {
      */
     public void resetOdometry() {
         readSensors();
-        myOtos.resetTracking(); // TODO Moved from the end. 9/3/2024
+        //myOtos.resetTracking; // TODO Moved from the end. 9/3/2024
+        //myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0));
         driveOdometerOffset = rawDriveOdometer;
         driveDistance = 0.0;
         driveController.reset(0);
