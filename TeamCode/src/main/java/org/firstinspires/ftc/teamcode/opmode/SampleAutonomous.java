@@ -57,7 +57,7 @@ public class SampleAutonomous extends LinearOpMode
 
             sleep(500);
 
-            // Drive the path again without turning.
+            // Drive the path again without turning. Low power.
             robot.drive(  24, 0.15, 0.5);
             robot.strafe( -24, 0.15, 0.5);
             robot.drive( -24, 0.15, 0.5);
