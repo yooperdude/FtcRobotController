@@ -16,8 +16,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  * The IMU gyro is used to stabilize the heading during all motions
  */
 
-@Autonomous(name="Next Try Sample Autonomous for OTOS Sensor", group = "Mr. Phil")
-public class SampleAutonomous extends LinearOpMode
+@Autonomous(name="Turning Sample Autonomous for OTOS Sensor", group = "Mr. Phil")
+public class SampleAutonomousTurning extends LinearOpMode
 {
     // get an instance of the "Robot" class.
     private NextTrySimplifiedOdometryRobot robot = new NextTrySimplifiedOdometryRobot(this);
@@ -42,26 +42,27 @@ public class SampleAutonomous extends LinearOpMode
             robot.drive(  -5.0, 0.60, 0.25);
             robot.strafe(  -5.0, 0.60, 0.25);
 */
-/*
+
             robot.turnTo(0, 0.25, 0.25);
-            robot.drive(  6.0, 0.20, 0.25);
+            robot.drive(  48.0, 0.50, 0.25);
            robot.turnTo(90, 0.25, 0.25);
-            robot.drive(  6.0, 0.20, 0.25);
+            robot.drive(  48.0, 0.50, 0.25);
            robot.turnTo(180, 0.25, 0.25);
-           robot.drive(  6.0, 0.20, 0.25);
+           robot.drive(  48.0, 0.50, 0.25);
             robot.turnTo(270, 0.25, 0.25);
-            robot.drive(  6.0, 0.20, 0.25);
+            robot.drive(  48.0, 0.50, 0.25);
             robot.turnTo(0, 0.25, 0.25);
-            robot.drive(  6.0, 0.20, 0.25);
-*/
+            robot.drive(  0.0, 0.50, 0.25);
 
-            //sleep(500);
 
+            sleep(500);
+/*
             // Drive the path again without turning. Low power.
-            robot.drive(  -48, 0.75, 0.25);
-            robot.strafe( 48, 0.75, 0.25);
-            robot.drive( 48, 0.75, 0.25);
-            robot.strafe(-48, 0.75, 0.25);
+            robot.drive(  24, 0.15, 0.5);
+            robot.strafe( -24, 0.15, 0.5);
+            robot.drive( -24, 0.15, 0.5);
+            robot.strafe(24, 0.15, 0.5);
+             */
         }
     }
 }

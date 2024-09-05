@@ -37,7 +37,7 @@ public class NextTrySimplifiedOdometryRobot {
     private static final double DRIVE_ACCEL         = 2.0;     // Acceleration limit.  Percent Power change per second.  1.0 = 0-100% power in 1 sec.
     private static final double DRIVE_TOLERANCE     = 0.5;     // Controller is is "inPosition" if position error is < +/- this amount
     private static final double DRIVE_DEADBAND      = 0.2;     // Error less than this causes zero output.  Must be smaller than DRIVE_TOLERANCE
-    private static final double DRIVE_MAX_AUTO      = 0.6;     // "default" Maximum Axial power limit during autonomous
+    private static final double DRIVE_MAX_AUTO      = 0.9;     // "default" Maximum Axial power limit during autonomous
 
     private static final double STRAFE_GAIN         = 0.03;    // Strength of lateral position control
     private static final double STRAFE_ACCEL        = 1.5;     // Acceleration limit.  Percent Power change per second.  1.0 = 0-100% power in 1 sec.
@@ -110,7 +110,7 @@ public class NextTrySimplifiedOdometryRobot {
         myOtos.setLinearUnit(DistanceUnit.INCH); //Units are inches
         myOtos.setAngularUnit(AngleUnit.DEGREES); //And in degrees
         myOtos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0)); //This sets current position to 0,0,0
-        myOtos.setLinearScalar(1.0); //This sets the linear scalar to 1.0, can define this later once robot is built and determine the scaling.
+        myOtos.setLinearScalar(0.979); //This sets the linear scalar to 1.0, can define this later once robot is built and determine the scaling.
         myOtos.setAngularScalar(1.0); //This sets the angular scalar to 1.0, can define this later once robot is built and determine the scaling.
         myOtos.resetTracking(); //This resets the tracking of the sensor
         myOtos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0)); //This sets the position of the sensor to 0,0,90 as the sensor is currently turned 90 degrees
@@ -161,6 +161,7 @@ public class NextTrySimplifiedOdometryRobot {
                 new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
+        imu.resetYaw();
 
         // zero out all the odometry readings and reset heading of the IMU.
         resetOdometry();
@@ -251,6 +252,7 @@ public class NextTrySimplifiedOdometryRobot {
             packet.put("MyOtos Head Position", otosRawHeading);
             packet.put("otosTurn - Compare to imu turn rate", otosTurn); //Otos
             packet.put("imu turn rate", turnRate);
+            packet.put("Otos heading", otosRawHeading);
             dashboard.sendTelemetryPacket(packet);
 
         }
