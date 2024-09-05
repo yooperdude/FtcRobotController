@@ -93,6 +93,9 @@ public class NextTrySimplifiedOdometryRobot {
     private double rawHeading       = 0; // Unmodified heading (degrees)
     private double headingOffset    = 0; // Used to offset heading
 
+    private double previousOtosHeading = 0;
+    private double previousTime = 0;
+
     private double turnRate           = 0; // Latest Robot Turn Rate from IMU
     private double otosTurn           = 0; // Latest Robot Turn Rate from OTOS
     private double otosHead           = 0; // Latest Robot Head from OTOS
@@ -191,23 +194,28 @@ public class NextTrySimplifiedOdometryRobot {
      * @return true
      */
     public boolean readSensors() {
+        double currentTime = myOpMode.getRuntime();
         double driveEncoder = myOtos.getPosition().x;
-        double driveEncoderabs = myOtos.getLinearScalar();
         double strafeEncoder = myOtos.getPosition().y;
         double otosRawHeading = myOtos.getPosition().h;
 
-
-        // TODO Look at the below, do we need to have a special spot for it?
-        //rawDriveOdometer = myOtos.getPosition().y * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
-        //rawStrafeOdometer = myOtos.getPosition().x * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
-
         rawDriveOdometer = driveEncoder * (INVERT_DRIVE_ODOMETRY ? -1 : 1);
         rawStrafeOdometer = strafeEncoder * (INVERT_STRAFE_ODOMETRY ? -1 : 1);
-        // TODO Look at the offset, is this needed if we zero the Otos?
+
         driveDistance = (rawDriveOdometer - driveOdometerOffset); // * ODOM_INCHES_PER_COUNT
         strafeDistance = (rawStrafeOdometer - strafeOdometerOffset); // * ODOM_INCHES_PER_COUNT;
 
-        // TODO Otos heading, need to declare this in the beginning.
+        // Calculate angular velocity from OTOS heading
+        double deltaTime = currentTime - previousTime;
+        if (deltaTime > 0) {
+            otosTurn = (otosRawHeading - previousOtosHeading) / deltaTime;
+        }
+
+        // Update previous heading and time
+        previousOtosHeading = otosRawHeading;
+        previousTime = currentTime;
+
+        //Need to determine if we want to use the OTOS for heading too.
         //otosHeading = myOtos.getPosition().h;
         //otosVelocity = myOtos.getVelocity().h;
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
@@ -220,8 +228,7 @@ public class NextTrySimplifiedOdometryRobot {
 
         //get myOtos velocity for heading and turn rate
 
-        otosTurn = myOtos.getVelocity().h;
-        otosHead = myOtos.getPosition().h;
+        otosHead = otosRawHeading;
 
         // Big Telemetry block to show all the values. myOpMode is for the Driver Station and packet.put is for the Dashboard.
 
@@ -242,6 +249,7 @@ public class NextTrySimplifiedOdometryRobot {
             packet.put("drivecontroller output", driveController.getOutput(driveDistance));
             packet.put("MyOtos Heading Velocity", otosTurn);
             packet.put("MyOtos Head Position", otosRawHeading);
+            packet.put("otosTurn - Compare to imu turn rate", otosTurn);
             dashboard.sendTelemetryPacket(packet);
 
         }
