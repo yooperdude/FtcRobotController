@@ -58,10 +58,10 @@ public class SampleAutonomous extends LinearOpMode
             sleep(500);
 
             // Drive the path again without turning.
-            robot.drive(  6, 0.60, 0.15);
-            robot.strafe( -6, 0.60, 0.15);
-            robot.drive( -6, 0.60, 0.15);
-            robot.strafe(6, 0.60, 0.15);
+            robot.drive(  24, 0.15, 0.5);
+            robot.strafe( -24, 0.15, 0.5);
+            robot.drive( -24, 0.15, 0.5);
+            robot.strafe(24, 0.15, 0.5);
         }
     }
 }
