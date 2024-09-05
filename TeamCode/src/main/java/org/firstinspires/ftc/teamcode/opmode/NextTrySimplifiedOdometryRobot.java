@@ -249,7 +249,7 @@ public class NextTrySimplifiedOdometryRobot {
             packet.put("drivecontroller output", driveController.getOutput(driveDistance));
             packet.put("MyOtos Heading Velocity", otosTurn);
             packet.put("MyOtos Head Position", otosRawHeading);
-            packet.put("otosTurn - Compare to imu turn rate", otosTurn);
+            packet.put("otosTurn - Compare to imu turn rate", otosTurn); //Otos
             packet.put("imu turn rate", turnRate);
             dashboard.sendTelemetryPacket(packet);
 
