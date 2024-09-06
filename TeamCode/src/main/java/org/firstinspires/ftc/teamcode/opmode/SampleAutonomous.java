@@ -54,14 +54,19 @@ public class SampleAutonomous extends LinearOpMode
             robot.turnTo(0, 0.25, 0.25);
             robot.drive(  6.0, 0.20, 0.25);
 */
+            robot.driveXY(  12,  0, 0.5, 0.25);
+            robot.driveXY(  -12,  12, 0.5, 0.25);
+
+          //  robot.driveXY(  12,  3, 0.5, 0.25);
+          //  robot.driveXY(  -12,  -3, 0.5, 0.25);
 
             //sleep(500);
 
             // Drive the path again without turning. Low power.
-            robot.drive(  -48, 0.75, 0.25);
-            robot.strafe( 48, 0.75, 0.25);
-            robot.drive( 48, 0.75, 0.25);
-            robot.strafe(-48, 0.75, 0.25);
+            //robot.drive(  -48, 0.75, 0.25);
+            //robot.strafe( 48, 0.75, 0.25);
+            //robot.drive( 48, 0.75, 0.25);
+            //robot.strafe(-48, 0.75, 0.25);
         }
     }
 }
