@@ -358,6 +358,39 @@ public class NextTrySimplifiedOdometryRobot {
         myOtos.resetTracking();
     }
 
+    /**
+     * Strafe in the lateral (left/right) direction, maintain the current heading and don't drift fwd/bwd
+     * @param xDistanceInches  Distance to travel.  +ve = fordward, -ve = reverse.
+     * @param yDistanceInches  Distance to travel.  +ve = left, -ve = right.
+     * @param power Maximum power to apply.  This number should always be positive.
+     * @param holdTime Minimum time (sec) required to hold the final position.  0 = no hold.
+     */
+
+    public void driveXY(double xDistanceInches, double yDistanceInches, double power, double holdTime) {
+        resetOdometry(); // Reset odometry at the start of the move
+
+        driveController.reset(yDistanceInches, power);   // Set desired drive distance
+        strafeController.reset(xDistanceInches, power);  // Set desired strafe distance
+        yawController.reset();                           // Maintain last turn heading
+        holdTimer.reset();
+
+        while (myOpMode.opModeIsActive() && readSensors()) {
+            // Implement desired axis powers
+            moveRobot(driveController.getOutput(driveDistance), strafeController.getOutput(strafeDistance), yawController.getOutput(heading));
+
+            // Time to exit?
+            if (driveController.inPosition() && strafeController.inPosition() && yawController.inPosition()) {
+                if (holdTimer.time() > holdTime) {
+                    break;   // Exit loop if we are in position, and have been there long enough.
+                }
+            } else {
+                holdTimer.reset();
+            }
+            myOpMode.sleep(10);
+        }
+        stopRobot();
+    }
+
 
     //  ########################  Low level control functions.  ###############################
 
