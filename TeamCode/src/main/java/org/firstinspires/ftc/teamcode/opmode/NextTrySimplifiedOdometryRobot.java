@@ -369,8 +369,8 @@ public class NextTrySimplifiedOdometryRobot {
     public void driveXY(double xDistanceInches, double yDistanceInches, double power, double holdTime) {
         resetOdometry(); // Reset odometry at the start of the move
 
-        driveController.reset(yDistanceInches, power);   // Set desired drive distance
-        strafeController.reset(xDistanceInches, power);  // Set desired strafe distance
+        driveController.reset(xDistanceInches, power);   // Set desired drive distance
+        strafeController.reset(yDistanceInches, power);  // Set desired strafe distance
         yawController.reset();                           // Maintain last turn heading
         holdTimer.reset();
 
