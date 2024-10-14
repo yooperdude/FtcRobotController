@@ -128,7 +128,7 @@ public class BasicLinearFieldCent extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
-        runtime.reset();
+        runtime.reset();//test
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
